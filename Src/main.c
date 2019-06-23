@@ -33,6 +33,11 @@
 #include "sensores.h"
 #include "pantalla.h"
 
+
+//#include <stdio.h>
+//#include <stdlib.h>
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -133,6 +138,7 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
+  //wait(500);
   inicializarPantalla(); //Ejecutar todo lo necesario para poder utilizar la pantalla
  //imprimirPantalla();  //QUITAAAAAAAAAAR!!!
   /* USER CODE END 2 */
@@ -140,30 +146,54 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint32_t temp;
-  uint8_t bufferTemp[2];  //Buffer de datos a enviar y leer por I2C
+  //uint32_t temp;
+  /*uint8_t bufferTemp[2];  //Buffer de datos a enviar y leer por I2C
   bufferTemp[0] = 0x01; //Dirección de registro de configuración
   bufferTemp[1] = 0x00; //Contenido a enviar al registro de configuración
   while(HAL_I2C_IsDeviceReady(&hi2c3, 0X90, 2, 10) != HAL_OK);
-  HAL_I2C_Master_Transmit(&hi2c3, 0x90, bufferTemp, 2, 10);
+  HAL_I2C_Master_Transmit(&hi2c3, 0x90, bufferTemp, 2, 10);*/
+  float alcohol;
+
+//  HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
+//  HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
+
+//  HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
+  //HAL_Delay(18000); //Para que caliente el heater
 
   while (1)
   {
 
-	 bufferTemp[0] = 0x00; //Dirección de registro de temperatura
+	 // imprimirSecuencia(6);
+
+	  //temp = medirTemp1();
+	//  imprimirBasico(4);
+	 /* FILE * fp;
+
+	     fp = fopen ("fileprueba.txt", "w+");
+	     fprintf(fp, "%s %s %s %d", "We", "are", "in", 2012);
+
+	     fclose(fp);*/
+
+	  alcohol = medirAlcohol();
+//	  alcohol = calibracionAlcohol();
+
+	  /*bufferTemp[0] = 0x00; //Dirección de registro de temperatura
 	  HAL_I2C_Master_Transmit(&hi2c3, 0x90, bufferTemp, 1, 10);
 	  HAL_I2C_Master_Receive(&hi2c3, 0x90, bufferTemp, 2, 10);
 
 	  temp = bufferTemp[0]*256 + bufferTemp[1];  //Primero devuelve el más significativo, como son 8 bits cada registro, para obtener el valor de ambos bytes hay que multiplicar el primero por 256
 
-	 // temp = temp * 0.00390625;  // Porque cada bit no vale 1ºC sino esos grados
-
+	 temp = temp * 0.00390625;  // Porque cada bit no vale 1ºC sino esos grados
+	  //temp = 0x100;
 	  //imprimirSecuencia(6);
 	 //imprimirAlertaSensor(187, 45, 1);
-	  imprimirAlertaSensor(temp, 45, 1);
+//	  imprimirAlertaSensor(temp, 45, 1);*/
+	  //imprimirPruebas(3, temp, 0);
+//	  imprimirPruebas(3, 90, 0);
+	  imprimirPruebas(0, alcohol, 0);
 
-
-
+//	  HAL_GPIO_TogglePin(LED_test_GPIO_Port, LED_test_Pin);
+//	  HAL_Delay(180);
 	/* USER CODE END WHILE */
 	/*  if(HAL_GetTick()-t1 < 400){
 		  imprimirPantalla(1);  //QUITAAAAAAAAAAR!!!

@@ -50,10 +50,10 @@ uint8_t u8x8_byte_my_hw_i2c(U8X8_UNUSED u8x8_t *u8x8, U8X8_UNUSED uint8_t msg, U
 //Ejecutar las funciones neesarias para comunicarse por I2C con la pantalla
 void inicializarPantalla(void){
 	//Para controlador ssd1306
-	u8g2_Setup_ssd1306_i2c_128x64_noname_2(&u8g2, U8G2_R0, u8x8_byte_my_hw_i2c, u8x8_stm32_gpio_and_delay);
+	//u8g2_Setup_ssd1306_i2c_128x64_noname_2(&u8g2, U8G2_R0, u8x8_byte_my_hw_i2c, u8x8_stm32_gpio_and_delay);
 
 	//Para controlador sh1106 (el de la pantalla que se usa)
-	//u8g2_Setup_sh1106_i2c_128x64_noname_1(&u8g2, U8G2_R0, u8x8_byte_my_hw_i2c, u8x8_stm32_gpio_and_delay);
+	u8g2_Setup_sh1106_i2c_128x64_noname_1(&u8g2, U8G2_R0, u8x8_byte_my_hw_i2c, u8x8_stm32_gpio_and_delay);
 
 	u8g2_InitDisplay(&u8g2);
 	u8g2_SetPowerSave(&u8g2, 0);
@@ -676,3 +676,88 @@ void imprimirAviso(maq_estados* maquina_est, int tipoAviso){
 
 
 }
+
+
+/*
+ *  Pantalla para las pruebas de sensores
+ */
+void imprimirPruebas(uint8_t sensor, float valor1, float valor2){
+	//char  alcohol[16], tension_sis[16], tension_dia[16], pulso[16], temperatura[16], estres[16], tension[16];
+	char  tension_sis[16], tension_dia[16], tension[64], valor[16];
+	float valor_float;
+
+	//Pasar a char los valores recogidos por los sensores
+	if(sensor == 3){
+		valor_float = (float)((float)valor1*0.00390625);
+		sprintf(valor, "%d.%.1d", (int16_t)valor_float, abs((int16_t)((valor_float-(int16_t)valor_float)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
+
+	}else{
+		//sprintf(valor, "%lu", valor1);  //Hacer cast de int a char
+		sprintf(valor, "%d.%.1d", (int16_t)valor1, abs((int16_t)((valor1-(int16_t)valor1)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
+	}
+
+	//sprintf(tension_sis, "%lu", valor1);  //Hacer cast de int a char
+	//sprintf(tension_dia, "%lu", valor2);  //Hacer cast de int a char
+	if(sensor == 1){
+		sprintf(tension_sis, "%d.%.1d", (int16_t)valor1, abs((int16_t)((valor1-(int16_t)valor1)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
+		sprintf(tension_dia, "%d.%.1d", (int16_t)valor2, abs((int16_t)((valor2-(int16_t)valor2)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
+
+
+		//Representar las tensiones como diastólica/sistólica
+		strcat(tension, tension_sis); //Para concatenar 2 strings
+		strcat(tension, "/"); //Para concatenar 2 strings
+		strcat(tension, tension_dia); //Para concatenar 2 strings
+	}
+
+	u8g2_FirstPage(&u8g2);
+	do{
+		u8g2_SetFont(&u8g2, u8g2_font_helvB08_tf);  //Fuente para nombres de parámetros
+		u8g2_DrawStr(&u8g2, 40, 10, "MEDIDAS");
+		u8g2_DrawStr(&u8g2, 0, 20, "Alcohol:");
+		u8g2_DrawStr(&u8g2, 0, 31, "Tensión:");
+		u8g2_DrawStr(&u8g2, 0, 42, "Pulso:");
+		u8g2_DrawStr(&u8g2, 0, 54, "Tª:");
+		u8g2_DrawStr(&u8g2, 0, 64, "Estrés:");
+/*
+		//Pasar a char los valores recogidos por los sensores
+		//sprintf(alcohol, "%lu", maquina_est->medidas_sens->alcohol);  //Hacer cast de int a char
+		sprintf(tension_sis, "%lu", valor1);  //Hacer cast de int a char
+		sprintf(tension_dia, "%lu", valor2);  //Hacer cast de int a char
+		//sprintf(pulso, "%lu", maquina_est->medidas_sens->pulso);  //Hacer cast de int a char
+		//sprintf(temperatura, "%lu", maquina_est->medidas_sens->temperatura);  //Hacer cast de int a char
+
+		//Representar las tensiones como diastólica/sistólica
+		strcat(tension, tension_sis); //Para concatenar 2 strings
+		strcat(tension, "/"); //Para concatenar 2 strings
+		strcat(tension, tension_dia); //Para concatenar 2 strings
+		*/
+
+
+		u8g2_SetFont(&u8g2, u8g2_font_profont12_tf);  //Fuente para nombres de parámetros
+		switch(sensor){
+			case 0:
+				u8g2_DrawStr(&u8g2, 60, 20, valor);  //Alcohol
+				break;
+			case 1:
+				u8g2_DrawStr(&u8g2, 60, 31, tension);  //Tensión
+				break;
+			case 2:
+				u8g2_DrawStr(&u8g2, 60, 42, valor);  //Pulso
+				break;
+			case 3:
+				u8g2_DrawStr(&u8g2, 60, 54, valor);  //Temperatura
+				break;
+			case 4:
+				u8g2_DrawStr(&u8g2, 60, 64, valor);  //Estrés
+				break;
+		}
+		//u8g2_DrawStr(&u8g2, 60, 54, valor1);  //Temperatura
+
+		u8g2_SetFont(&u8g2, u8g2_font_open_iconic_all_2x_t);  //Fuente para los iconos
+		u8g2_DrawGlyph(&u8g2, 93, 14, 238);  //Electrocardiograma
+		u8g2_DrawGlyph(&u8g2, 110, 64, 183);  //Corazón
+	}while(u8g2_NextPage(&u8g2));
+
+
+}
+

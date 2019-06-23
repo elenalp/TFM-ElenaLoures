@@ -39,10 +39,10 @@ int alerta_dada(maq_estados* maquina_est);
 /*
  * Acciones en estado destino
  */
-void medirAlcohol(maq_estados* maquina_est);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
-
+//void medirAlcohol(maq_estados* maquina_est);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
+float medirAlcohol(void);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
 void medirSensores(maq_estados* maquina_est);  //Activa todos los sensores excepto el sensor de alcohol y almacena en la estructura los valores detectados
-
+float calibracionAlcohol(void);
 //void imprimirMedidas(maq_estados* maquina_est);   //Saca por pantalla todas las medidas de los sensores
 
 void vibracion(void);    //Activa el motor para alertar mediante vibración
@@ -51,7 +51,8 @@ void imprimirYvibrar(maq_estados* maquina_est);   //Imprime por pantalla el pará
 
 //void imprimirAviso(maq_estados* maquina_est, int tipoAviso);  //Imprime un mensaje por pantalla en función del aviso tipoAviso=0 si se inicia el sistema y se va a medir el nivel de alcohol, tipoAviso=1 si batería baja, tipoAviso=2 si se ha conectado para cargar y tipoAviso=3 si se carga estando encendido
 
-void medirTemp(maq_estados* maquina_est);   //Realiza la medición de la temperatura corporal
+//void medirTemp(maq_estados* maquina_est);   //Realiza la medición de la temperatura corporal
+uint32_t medirTemp1(void);
 
 void medirBateria(maq_estados* maquina_est, uint32_t valorADC1);  //Estima la batería que tiene
 
