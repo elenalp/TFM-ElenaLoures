@@ -14,6 +14,7 @@ void inicializar_maq(maq_estados* maquina_estados, estado_maq* situ_maquina, maq
 
 	maquina_estados->situacion_maq = situ_maquina;
 	maquina_estados->transicion_maq = trans_maquina;
+	maquina_estados->medidas_sens->medida_mala = 30;   //Para saber que aún no se comprobó el nivel de alcohol
 }
 
 //Ejecutar la máquina de estados

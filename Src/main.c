@@ -152,20 +152,21 @@ int main(void)
   bufferTemp[1] = 0x00; //Contenido a enviar al registro de configuración
   while(HAL_I2C_IsDeviceReady(&hi2c3, 0X90, 2, 10) != HAL_OK);
   HAL_I2C_Master_Transmit(&hi2c3, 0x90, bufferTemp, 2, 10);*/
-  float alcohol, ro;
+  //float alcohol, ro;
+  float gsr;
 
   HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
 //  HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
 
 //  HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
   //HAL_Delay(18000); //Para que caliente el heater
-  HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
-  ro = calibracionAlcohol();  //ME VOY DE DIRECCIÓN!!!!
+//  HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
+ // ro = calibracionAlcohol();  //ME VOY DE DIRECCIÓN!!!!
   //ro=1200;
-  imprimirPruebas(0, ro, 0);
-  HAL_Delay(3000); //En ms
-  imprimirBasico(9);
-  HAL_Delay(5000); //En ms
+  //imprimirPruebas(0, ro, 0);
+  //HAL_Delay(3000); //En ms
+  //imprimirBasico(9);
+  //HAL_Delay(5000); //En ms
   while (1)
   {
 //ro = 1000;
@@ -180,7 +181,8 @@ int main(void)
 
 	     fclose(fp);*/
 
-	  alcohol = medirAlcohol(ro);
+	  gsr = medirGSR();
+	  //alcohol = medirAlcohol();
 	 // alcohol = 4.5;
 //	  alcohol = calibracionAlcohol();
 
@@ -197,7 +199,13 @@ int main(void)
 //	  imprimirAlertaSensor(temp, 45, 1);*/
 	  //imprimirPruebas(3, temp, 0);
 //	  imprimirPruebas(3, 90, 0);
-	  imprimirPruebas(0, alcohol, 0);
+//	  imprimirPruebas(0, alcohol, 0);
+	  imprimirPruebas(4, gsr, 0);
+
+	  /*//PARA PRUEBAS!!!
+	  HAL_Delay(3000); //En ms
+	  imprimirBasico(4);
+	  HAL_Delay(3000); //En ms*/
 
 //	  HAL_GPIO_TogglePin(LED_test_GPIO_Port, LED_test_Pin);
 //	  HAL_Delay(180);

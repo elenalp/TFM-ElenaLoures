@@ -22,9 +22,9 @@ typedef void (*func_destino) (maq_estados*);
 
 //Condiciones para cambios de estado
 typedef struct maq_transiciones{
-	int estado_origen; //Estado anterior al destino, desde el que se hace la transición
+	uint8_t estado_origen; //Estado anterior al destino, desde el que se hace la transición
   	func_cambio condic_cambio; //Comprobación de si se cumple o no la condición para hacer la transición
-  	int estado_destino; //Estado al que irá
+  	uint8_t estado_destino; //Estado al que irá
   	func_destino accion_destino;  //Acción a realizar en el estado destino
 	//func_condicion condic_entrada;
 	//func_condicion condic_salida;
@@ -38,7 +38,9 @@ typedef struct medidasSensores {
 	uint32_t tension_dia;       //Medida de la tensión arterial obtenida del AFE (diastólica)
 	uint32_t pulso;         //Medida del pulso obtenida del AFE
 	uint32_t temperatura;   //Medida de la temperatura corporal obtenida del sensor
-	char estres;        //Medida del nivel de estrés obtenida de la medida de GSR
+	char estres[16];        //Medida del nivel de estrés obtenida de la medida de GSR
+	float ref_GSR;       //Medida de la respuesta galvánica de la piel en reposo
+	float refPulso;       //Medida de pulso en reposo
 	uint8_t medida_mala;  //Sensor en que la medida no es la que debe
 
 } medidasSensores;
