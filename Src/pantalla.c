@@ -363,7 +363,7 @@ void parpadeoSecuencia(uint8_t caso, uint8_t icono_mostrado){
  */
 //void imprimirSensores(maq_estados* maquina_est){
 void imprimirMedidas(maq_estados* maquina_est){
-	char  alcohol[16], tension_sis[16], tension_dia[16], pulso[16], temperatura[16], estres[16], tension[16];
+	char  alcohol[16], tension_sis[16], tension_dia[16], pulso[16], temperatura[16], estres[16], tension[64];
 	u8g2_FirstPage(&u8g2);
 	do{
 		u8g2_SetFont(&u8g2, u8g2_font_helvB08_tf);  //Fuente para nombres de parámetros
@@ -683,7 +683,7 @@ void imprimirAviso(maq_estados* maquina_est, int tipoAviso){
  */
 void imprimirPruebas(uint8_t sensor, float valor1, float valor2){
 	//char  alcohol[16], tension_sis[16], tension_dia[16], pulso[16], temperatura[16], estres[16], tension[16];
-	char  tension_sis[16], tension_dia[16], tension[64], valor[16];
+	char  tension_sis[32], tension_dia[32], tension[64], valor[64];
 	float valor_float;
 
 	//Pasar a char los valores recogidos por los sensores
@@ -693,7 +693,7 @@ void imprimirPruebas(uint8_t sensor, float valor1, float valor2){
 
 	}else{
 		//sprintf(valor, "%lu", valor1);  //Hacer cast de int a char
-		sprintf(valor, "%d.%.1d", (int16_t)valor1, abs((int16_t)((valor1-(int16_t)valor1)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
+		sprintf(valor, "%d.%.3d", (int16_t)valor1, abs((int16_t)((valor1-(int16_t)valor1)*1000.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
 	}
 
 	//sprintf(tension_sis, "%lu", valor1);  //Hacer cast de int a char

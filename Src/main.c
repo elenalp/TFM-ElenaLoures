@@ -152,17 +152,23 @@ int main(void)
   bufferTemp[1] = 0x00; //Contenido a enviar al registro de configuración
   while(HAL_I2C_IsDeviceReady(&hi2c3, 0X90, 2, 10) != HAL_OK);
   HAL_I2C_Master_Transmit(&hi2c3, 0x90, bufferTemp, 2, 10);*/
-  float alcohol;
+  float alcohol, ro;
 
-//  HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
 //  HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
 
 //  HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
   //HAL_Delay(18000); //Para que caliente el heater
-
+  HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
+  ro = calibracionAlcohol();  //ME VOY DE DIRECCIÓN!!!!
+  //ro=1200;
+  imprimirPruebas(0, ro, 0);
+  HAL_Delay(3000); //En ms
+  imprimirBasico(9);
+  HAL_Delay(5000); //En ms
   while (1)
   {
-
+//ro = 1000;
 	 // imprimirSecuencia(6);
 
 	  //temp = medirTemp1();
@@ -174,7 +180,8 @@ int main(void)
 
 	     fclose(fp);*/
 
-	  alcohol = medirAlcohol();
+	  alcohol = medirAlcohol(ro);
+	 // alcohol = 4.5;
 //	  alcohol = calibracionAlcohol();
 
 	  /*bufferTemp[0] = 0x00; //Dirección de registro de temperatura

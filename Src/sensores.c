@@ -8,7 +8,7 @@
 #define INTERVALO_CALIB_ALCOHOL 500  //Milisegundos entre dos muestras del nivel de alcohol durante la calibración
 #define INTERVALO_MED_ALCOHOL 5  //Milisegundos entre dos muestras del nivel de alcohol durante la medida
 #define INTERVALO_MED_ALCOHOL_GUARDADAS 10  //Número de muestras entre valores medios guardados
-#define MUESTRAS_CALIB_ALCOHOL 50.0  //Número de muestras para la calibración del sensor del nivel de alcohol (.0 para que interprete que es float)
+#define MUESTRAS_CALIB_ALCOHOL 50  //Número de muestras para la calibración del sensor del nivel de alcohol (.0 para que interprete que es float)
 #define MUESTRAS_MED_ALCOHOL 50  //Número de muestras para la medida del nivel de alcohol
 #define V_REF 3.3  //Valor de referencia de tensión
 #define V_BAT_MIN 3.2 //Tensión mínima de la batería para que no se estropee
@@ -21,16 +21,27 @@
 #define A_TRAMO1 10.375  //Primer parámetro de la ecuación del tramo 1 del alcohol
 #define B_TRAMO1 87.032  //Segundo parámetro de la ecuación del tramo 1 del alcohol
 #define C_TRAMO1 230.55  //Tercer parámetro de la ecuación del tramo 1 del alcohol
-#define A_TRAMO2 163204  //Primer parámetro de la ecuación del tramo 2 del alcohol
+
+//y = -32548x5 + 102490x4 - 119134x3 + 63102x2 - 16426x + 2839,6
+#define A_TRAMO2 32548  //Primer parámetro de la ecuación del tramo 2 del alcohol
+#define B_TRAMO2 102490  //Segundo parámetro de la ecuación del tramo 2 del alcohol
+#define C_TRAMO2 119134  //Tercer parámetro de la ecuación del tramo 2 del alcohol
+#define D_TRAMO2 63102  //Cuarto parámetro de la ecuación del tramo 2 del alcohol
+#define E_TRAMO2 16426  //Quinto parámetro de la ecuación del tramo 2 del alcohol
+#define F_TRAMO2 2839.6  //Sexto parámetro de la ecuación del tramo 2 del alcohol
+
+/*#define A_TRAMO2 163204  //Primer parámetro de la ecuación del tramo 2 del alcohol
 #define B_TRAMO2 688610  //Segundo parámetro de la ecuación del tramo 2 del alcohol
-#define C_TRAMO2 exp(6)  //Tercer parámetro de la ecuación del tramo 2 del alcohol
+//#define C_TRAMO2 exp(6)  //Tercer parámetro de la ecuación del tramo 2 del alcohol
+#define C_TRAMO2 pow(10, 6)  //Tercer parámetro de la ecuación del tramo 2 del alcohol
 #define D_TRAMO2 983296  //Cuarto parámetro de la ecuación del tramo 2 del alcohol
 #define E_TRAMO2 441823  //Quinto parámetro de la ecuación del tramo 2 del alcohol
 #define F_TRAMO2 100218  //Sexto parámetro de la ecuación del tramo 2 del alcohol
-#define G_TRAMO2 10120  //Séptimo parámetro de la ecuación del tramo 2 del alcohol
+#define G_TRAMO2 10120  //Séptimo parámetro de la ecuación del tramo 2 del alcohol*/
 #define A_TRAMO3 6666.7  //Primer parámetro de la ecuación del tramo 3 del alcohol
 #define B_TRAMO3 2666.7  //Segundo parámetro de la ecuación del tramo 3 del alcohol
-#define CTE_PPM2MG 1.8843*pow(10,-3)  //Cte para hacer la correspondencia de PPM a mg/l
+#define CTE_PPM2MG (1.8843*pow(10,(-3)))  //Cte para hacer la correspondencia de PPM a mg/l
+//#define CTE_PPM2MG (1.8843)  //Cte para hacer la correspondencia de PPM a mg/l
 #define MAX_ALCOHOL 0.25  //Tasa máxima de alcohol permitida en aire expirado y conductores generales (mg/l)
 
 
@@ -40,7 +51,7 @@ float calibracionAlcohol(void){
 	float valorADC1, valor_calibracion, t_inicial, rs, ro;
 	uint8_t i;
 
-//HAL_Delay(18000); //Para que caliente el heater
+HAL_Delay(10000); //Para que caliente el heater y se cargue el condensador
 
 	/*
 	 * Leer nivel de alcohol (ADC)
@@ -93,7 +104,7 @@ float calibracionAlcohol(void){
 	 *
 	 */
 	//valor_calibracion = valor_calibracion/MUESTRAS_CALIB_ALCOHOL;
-	//valor_calibracion = 0;
+	valor_calibracion = 0.0;
 
 	for(i=0; i<MUESTRAS_CALIB_ALCOHOL; i++){
 
@@ -116,13 +127,13 @@ float calibracionAlcohol(void){
 		HAL_ADC_Stop(&hadc1);
 	}
 
-	valor_calibracion = (float)(valor_calibracion/MUESTRAS_CALIB_ALCOHOL);
-	valor_calibracion = (float)((valor_calibracion/ADC_MAX)*V_REF);  //Porque los ADCs son de 12 bits (4096) que marcan los 3.3V (Vcc, la referencia del micro)
+	valor_calibracion = (float)(valor_calibracion/(float)MUESTRAS_CALIB_ALCOHOL);
+	valor_calibracion = (float)(((float)(valor_calibracion/ADC_MAX))*V_REF);  //Porque los ADCs son de 12 bits (4096) que marcan los 3.3V (Vcc, la referencia del micro)
 
-	rs = (float)(V_ALCOHOL*(RL/valor_calibracion))-RL;
-
+	rs = (float)(V_ALCOHOL*((float)(RL/valor_calibracion)))-RL;
 
 	ro = (float)(rs/RELACION_RSRO);
+	//imprimirBasico(9); //SOLO PARA PRUEBAS!!!
 
 /*	HAL_ADC_Start(&hadc1);
 	HAL_ADC_PollForConversion(&hadc1, TIMEOUT_ADC);
@@ -142,15 +153,15 @@ float calibracionAlcohol(void){
  * Se toman valores, se hacen varias medias y luego la media de esas medias excluyendo la más baja (son probablemente las medidas de cuando no está soplando)
  */
 //void medirAlcohol(maq_estados* maquina_est){
-float medirAlcohol(void){   //CAMBIAR FUNCIÓN Y SOBRE TODO FORMA DE APLICAR LA REFERENCIA!!!!!!!  SACAR V, LUEGO RS Y CON LA RO SACAR DE LA EXPONENCIAL LAS PPM Y HACER CONVERSIÓN A MG/L
+float medirAlcohol(float ro){   //CAMBIAR FUNCIÓN Y SOBRE TODO FORMA DE APLICAR LA REFERENCIA!!!!!!!  SACAR V, LUEGO RS Y CON LA RO SACAR DE LA EXPONENCIAL LAS PPM Y HACER CONVERSIÓN A MG/L
 	//uint32_t valorADC1, valorADC2;  //, valorADC3;  //Lecturas del ADC
 	float valorADC1, valorADC2;   //Lecturas del ADC
 	uint32_t t_inicial;  //, t_final;  //Valor del instante actual en milisegundos
-	float ro;  //Valor de ro obtenido de la calibración para el ambiente en que se encuentra el sensor
+//	float ro;  //Valor de ro obtenido de la calibración para el ambiente en que se encuentra el sensor
 	//float tension_bat;   //Valor de tensión del divisor de la batería
 	uint8_t i, j, k, l;
 	//uint32_t medidasAlcohol[INTERVALO_MED_ALCOHOL_GUARDADAS];
-	float medias[MUESTRAS_MED_ALCOHOL/INTERVALO_MED_ALCOHOL_GUARDADAS];
+	float medias[(int)(MUESTRAS_MED_ALCOHOL/INTERVALO_MED_ALCOHOL_GUARDADAS)];
 	float medidaAlcohol;  // Medida de alcohol tras hacer las medias sin aplicar el offset
 	float min_media;  //Medida mínima de alcohol de las medias
 	float vrl;  //Tensión correspondiente a la medida de alcohol obtenida
@@ -161,10 +172,10 @@ float medirAlcohol(void){   //CAMBIAR FUNCIÓN Y SOBRE TODO FORMA DE APLICAR LA R
 //	imprimirAviso(maquina_est, 0);    //Imprimir bienvenida
 //	imprimirAviso(maquina_est, 1);    //Imprimir que va a calibrar
 
-	HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
-	HAL_Delay(18000); //Para que caliente el heater
+//	HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
+//	HAL_Delay(18000); //Para que caliente el heater  ESTÁ EN 18 SEGUNDOS
 //	ro = calibracionAlcohol(maquina_est);  //Calibración del sensor del nivel de alcohol
-	ro = calibracionAlcohol();  //Calibración del sensor del nivel de alcohol
+//	ro = calibracionAlcohol();  //Calibración del sensor del nivel de alcohol
 //	imprimirAviso(maquina_est, 2);    //Imprimir inicio de medición del nivel de alcohol
 
 	t_inicial = HAL_GetTick(); //Tomar valor de tiempo actual (en milisegundos)
@@ -236,7 +247,7 @@ float medirAlcohol(void){   //CAMBIAR FUNCIÓN Y SOBRE TODO FORMA DE APLICAR LA R
 
 	}*/
 
-	HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_RESET);  //Poner a 0 HeaterON_OFF
+//	HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_RESET);  //Poner a 0 HeaterON_OFF
 
 	min_media = medias[0]; //Para que tenga un valor inicial con que comparar
 
@@ -254,28 +265,35 @@ float medirAlcohol(void){   //CAMBIAR FUNCIÓN Y SOBRE TODO FORMA DE APLICAR LA R
 
 	rs = (V_ALCOHOL*(RL/vrl)) - RL;  //Cálculo de Rs en función de V_RL
 
-	relacion_r = rs/ro;
-
+	relacion_r = (float)(rs/ro);
+	//imprimirBasico(7); //SOLO PARA PRUEBAS!!!!
 	/*
 	 * Hacer ajuste por tramos de la curva de correspondencia Rs/Ro vs PPM
 	 * ppm : Obtener valor de ppm al que corresponde la relación rs/ro
 	 */
-	if((relacion_r < 4) && (relacion_r >= 2)){  //Tramo 1
+	//if((relacion_r < 4) && (relacion_r >= 2)){  //Tramo 1
+	if((relacion_r < 4) && (relacion_r > 1.1)){  //Tramo 1
 		//Ecuación de la curva del tramo 1: y = 10.375x2 - 87.032x + 230.55;
-		ppm = A_TRAMO1*pow(relacion_r, 2) - B_TRAMO1*relacion_r + C_TRAMO1;
-	}else if((relacion_r < 2) && (relacion_r >= 0.2)){  //Tramo 2
+		ppm = (float)(A_TRAMO1*pow(relacion_r, 2) - B_TRAMO1*relacion_r + C_TRAMO1);
+		//ppm = 1;
+	//}else if((relacion_r < 2) && (relacion_r >= 0.2)){  //Tramo 2
+	}else if((relacion_r <= 1.1) && (relacion_r >= 0.2)){  //Tramo 2
 		//Ecuación de la curva del tramo 2: y = 163204*x6 - 688610x5 + 1E+06x4 - 983296x3 + 441823x2 - 100218x + 10120;
-		ppm = A_TRAMO2*pow(relacion_r, 6) - B_TRAMO2*pow(relacion_r, 5) + C_TRAMO2*pow(relacion_r, 4) - D_TRAMO2*pow(relacion_r, 3) + E_TRAMO2*pow(relacion_r, 2) - F_TRAMO2*relacion_r + G_TRAMO2;
+		//ppm = (float)(A_TRAMO2*pow(relacion_r, 6) - B_TRAMO2*pow(relacion_r, 5) + C_TRAMO2*pow(relacion_r, 4) - D_TRAMO2*pow(relacion_r, 3) + E_TRAMO2*pow(relacion_r, 2) - F_TRAMO2*relacion_r + G_TRAMO2);
+		//Ecuación de la curva del tramo 2: y = -32548x5 + 102490x4 - 119134x3 + 63102x2 - 16426x + 2839,6
+		ppm = (float)((-A_TRAMO2)*pow(relacion_r, 5) + B_TRAMO2*pow(relacion_r, 4) - C_TRAMO2*pow(relacion_r, 3) + D_TRAMO2*pow(relacion_r, 2) - E_TRAMO2*relacion_r + F_TRAMO2);
+		//ppm = 2;
 	}
 	else if(relacion_r < 0.2){  //Tramo 3
 		//Ecuación de la curva del tramo 3: y = -6666.7x + 2666.7;
-		ppm = -A_TRAMO3*relacion_r + B_TRAMO3;
+		ppm = (float)(-A_TRAMO3*relacion_r + B_TRAMO3);
+		//ppm = 3;
 	}else if(relacion_r > 4){
 		//Aire
-		ppm = 0;
+		ppm = 0.0;
 	}
 
-	mg = relacion_r*CTE_PPM2MG;  //Correspondencia de ppm en mg/l para etanol
+	mg = (float)(ppm*CTE_PPM2MG);  //Correspondencia de ppm en mg/l para etanol
 
 //	maquina_est->medidas_sens->alcohol = mg;
 
@@ -290,8 +308,7 @@ float medirAlcohol(void){   //CAMBIAR FUNCIÓN Y SOBRE TODO FORMA DE APLICAR LA R
 		imprimirAviso(maquina_est, 5);  //Imprimir aviso de alcohol
 	}
 	*/
-
-	return mg;  //SOLO PARA PRUEBAS
+	return mg;
 }
 
 //Activa todos los sensores excepto el sensor de alcohol y almacena en la estructura los valores detectados

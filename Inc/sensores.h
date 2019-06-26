@@ -40,7 +40,8 @@ int alerta_dada(maq_estados* maquina_est);
  * Acciones en estado destino
  */
 //void medirAlcohol(maq_estados* maquina_est);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
-float medirAlcohol(void);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
+//float medirAlcohol(void);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
+float medirAlcohol(float ro);
 void medirSensores(maq_estados* maquina_est);  //Activa todos los sensores excepto el sensor de alcohol y almacena en la estructura los valores detectados
 float calibracionAlcohol(void);
 //void imprimirMedidas(maq_estados* maquina_est);   //Saca por pantalla todas las medidas de los sensores
