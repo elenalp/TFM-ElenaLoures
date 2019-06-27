@@ -48,7 +48,13 @@
 #define MIN_DIF_GSR 0.1 //Mínima diferencia de valor de GSR con respecto a la referencia para considerar estrés normal
 #define MAX_DIF_GSR 0.4 //Máxim diferencia de valor de GSR con respecto a la referencia para considerar estrés normal
 #define MIN_DIF_PULSO 0.1 //Mínima diferencia de valor de pulso con respecto a la referencia para considerar estrés normal
-#define MAX_DIF_PULSO 0.4 //Máxim diferencia de valor de pulso con respecto a la referencia para considerar estrés normal
+#define MAX_DIF_PULSO 0.4 //Máxima diferencia de valor de pulso con respecto a la referencia para considerar estrés normal
+#define MAX_TEMP 37.5  //Valor máximo de temperatura para que salte la alerta
+#define MIN_TEMP 35  //Valor mínimo de temperatura para que salte la alerta
+#define MAX_TENS_SIS 140  //Tensión sistólica a partir de la cual se considera tensión alta
+#define MIN_TENS_SIS 90  //Tensión sistólica a partir de la cual se considera tensión baja
+#define MAX_TENS_DIAS 90  //Tensión diastólica a partir de la cual se considera tensión alta
+#define MIN_TENS_DIAS 60  //Tensión diastólica a partir de la cual se considera tensión baja
 
 
 //Calibración del sensor del nivel de alcohol
@@ -496,8 +502,51 @@ uint8_t rangoAlcohol(maq_estados* maquina_est){
 
 //Devuelve si la medida de estrés está o no dentro del rango
 uint8_t rangoEstres(maq_estados* maquina_est){
-	if(maquina_est->medidas_sens->estres == MAX_ESTRES){  //Medida fuera de rango
+	if(maquina_est->medidas_sens->estres = MAX_ESTRES){  //Medida fuera de rango
 		maquina_est->medidas_sens->medida_mala = 5;  //Marcar como mala la medida del estrés
+		return 0;
+	}else{  //Medida dentro del rango
+		return 1;
+	}
+}
+
+//Devuelve si la medida del pulso está o no dentro del rango
+uint8_t rangoPulso(maq_estados* maquina_est){
+	float pulso;
+	float dif_pulso, ref_pulso;
+
+	pulso = maquina_est->medidas_sens->pulso;
+	ref_pulso = maquina_est->medidas_sens->refPulso;
+
+	dif_pulso = (float)((pulso-ref_pulso)/ref_pulso);
+
+	if((dif_pulso >= MAX_DIF_PULSO)||(dif_pulso <= MIN_DIF_PULSO)){  //Medida fuera de rango
+		maquina_est->medidas_sens->medida_mala = 3;  //Marcar como mala la medida de pulso
+		return 0;
+	}else{  //Medida dentro del rango
+		return 1;
+	}
+}
+
+//Devuelve si la medida de la tensión está o no dentro del rango
+uint8_t rangoTension(maq_estados* maquina_est){
+	uint32_t tension_sis, tension_dias;
+
+	tension_sis = maquina_est->medidas_sens->tension_sis;
+	tension_dias = maquina_est->medidas_sens->tension_dia;
+
+	if((tension_sis >= MAX_TENS_SIS)||(tension_sis <= MIN_TENS_SIS)||(tension_dias <= MAX_TENS_DIAS)||(tension_dias <= MIN_TENS_DIAS)){  //Medida fuera de rango
+		maquina_est->medidas_sens->medida_mala = 2;  //Marcar como mala la medida de tensión
+		return 0;
+	}else{  //Medida dentro del rango
+		return 1;
+	}
+}
+
+//Devuelve si la medida de temperatura está o no dentro del rango
+uint8_t rangoTemp(maq_estados* maquina_est){
+	if((maquina_est->medidas_sens->temperatura >= MAX_TEMP)||(maquina_est->medidas_sens->temperatura <= MIN_TEMP)){  //Medida fuera de rango
+		maquina_est->medidas_sens->medida_mala = 4;  //Marcar como mala la medida de temperatura
 		return 0;
 	}else{  //Medida dentro del rango
 		return 1;

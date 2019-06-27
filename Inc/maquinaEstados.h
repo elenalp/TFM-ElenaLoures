@@ -33,11 +33,11 @@ typedef struct maq_transiciones{
 
 //Medidas tomadas por todos los sensores
 typedef struct medidasSensores {
-	uint32_t alcohol;       //Medida de la concentración de alcohol obtenida del alcoholímetro
+	float alcohol;       //Medida de la concentración de alcohol obtenida del alcoholímetro
 	uint32_t tension_sis;       //Medida de la tensión arterial obtenida del AFE (sistólica)
 	uint32_t tension_dia;       //Medida de la tensión arterial obtenida del AFE (diastólica)
-	uint32_t pulso;         //Medida del pulso obtenida del AFE
-	uint32_t temperatura;   //Medida de la temperatura corporal obtenida del sensor
+	float pulso;         //Medida del pulso obtenida del AFE
+	float temperatura;   //Medida de la temperatura corporal obtenida del sensor
 	char estres[16];        //Medida del nivel de estrés obtenida de la medida de GSR
 	float ref_GSR;       //Medida de la respuesta galvánica de la piel en reposo
 	float refPulso;       //Medida de pulso en reposo
