@@ -274,7 +274,8 @@ void medirAlcohol(maq_estados* maquina_est){
 
 	}*/
 
-//	HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_RESET);  //Poner a 0 HeaterON_OFF
+	HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_RESET);  //Poner a 0 HeaterON_OFF
+	HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_RESET);  //Desconectar la alimentación de 5V
 
 	min_media = medias[0]; //Para que tenga un valor inicial con que comparar
 
