@@ -68,8 +68,8 @@ static enum estados_posibles{ALCOHOL, ALERTAR, MEDIR, BATERIA_BAJA, CARGANDO, MO
  * Definición de la máquina de estados
  * {Estado inicial, Condición para cambio de estado, Estado final, Acción en estado final}
  */
-static maq_transiciones transi_posibles[] = {
-  {ALCOHOL, medida_mal, ALERTAR, imprimirYvibrar},
+static maq_transiciones transi_posibles[16][4] = {
+  {ALCOHOL, medida_mal_alcohol, ALERTAR, imprimirYvibrar},
   {ALCOHOL, medida_bien, MEDIR, medirSensores},
   {ALCOHOL, bat_baja, BATERIA_BAJA, imprimirAviso},
   {ALCOHOL, conectado, CARGANDO, imprimirAviso},
@@ -138,8 +138,19 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
-  //wait(500);
   inicializarPantalla(); //Ejecutar todo lo necesario para poder utilizar la pantalla
+
+  estado_maq* situacion_maq;
+  medidasSensores* medidas_sens;
+  //estado_maq* situacion_maq[] = {{0,0,0}};
+  //imprimirBasico(8);
+  //HAL_Delay(1000); //En ms
+  maq_estados* maquina_estados = crear_maq(situacion_maq, transi_posibles, medidas_sens);
+
+  //imprimirBasico(7);
+   //HAL_Delay(1000); //En ms
+  //wait(500);
+
  //imprimirPantalla();  //QUITAAAAAAAAAAR!!!
   /* USER CODE END 2 */
 // uint32_t t1 = HAL_GetTick();
@@ -153,27 +164,33 @@ int main(void)
   while(HAL_I2C_IsDeviceReady(&hi2c3, 0X90, 2, 10) != HAL_OK);
   HAL_I2C_Master_Transmit(&hi2c3, 0x90, bufferTemp, 2, 10);*/
   //float alcohol, ro;
-  float gsr;
+  //float gsr;
 
-  HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
-//  HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
+// HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
+// HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
 
-//  HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
+// uint8_t ppg;
+
+ // HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
   //HAL_Delay(18000); //Para que caliente el heater
-//  HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
- // ro = calibracionAlcohol();  //ME VOY DE DIRECCIÓN!!!!
+ // HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
+ // ro = calibracionAlcohol();
   //ro=1200;
   //imprimirPruebas(0, ro, 0);
   //HAL_Delay(3000); //En ms
   //imprimirBasico(9);
-  //HAL_Delay(5000); //En ms
+  //HAL_Delay(1000); //En ms
+  //imprimirSecuencia(5);
   while (1)
   {
+
+	  ejecutar_maq(maquina_estados);
+
 //ro = 1000;
 	 // imprimirSecuencia(6);
 
 	  //temp = medirTemp1();
-	//  imprimirBasico(4);
+	  //imprimirBasico(4);
 	 /* FILE * fp;
 
 	     fp = fopen ("fileprueba.txt", "w+");
@@ -181,7 +198,7 @@ int main(void)
 
 	     fclose(fp);*/
 
-	  gsr = medirGSR();
+	 // gsr = medirGSR();
 	  //alcohol = medirAlcohol();
 	 // alcohol = 4.5;
 //	  alcohol = calibracionAlcohol();
@@ -200,7 +217,10 @@ int main(void)
 	  //imprimirPruebas(3, temp, 0);
 //	  imprimirPruebas(3, 90, 0);
 //	  imprimirPruebas(0, alcohol, 0);
-	  imprimirPruebas(4, gsr, 0);
+	  //imprimirPruebas(4, gsr, 0);
+
+//	  ppg = medirTensionPulso();
+//	  imprimirPruebas(4, ppg, 0);
 
 	  /*//PARA PRUEBAS!!!
 	  HAL_Delay(3000); //En ms

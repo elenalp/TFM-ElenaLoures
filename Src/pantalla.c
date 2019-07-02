@@ -2,7 +2,7 @@
 #include "i2c.h"
 #include "maquinaEstados.h"
 
-#define REPETICIONES 20  //Número de veces que parpadean los iconos (ciclos de parpadeo)
+#define REPETICIONES 5  //Número de veces que parpadean los iconos (ciclos de parpadeo)
 #define LIMITE_ON 400  //Valor de tiempo en el que deja de aparecer el icono
 #define LIMITE_OFF 600  //Valor de tiempo en el que deja de estar oculto el icono
 #define DIM_RECTANGULO 32  //Dimensiones del rectángulo que oculta los iconos
@@ -601,10 +601,11 @@ void imprimirParpadeo(uint8_t caso){
 		  parpadeoSimple(caso, 0);
 		  if(t_diferencia > LIMITE_OFF){
 			  t_ref = HAL_GetTick(); //Actualización del valor de tiempo de referencia
-			  num_rep--;
+			  num_rep++;
 		  }
 		}
 	}
+	u8g2_SetDrawColor(&u8g2, 1); //Para que el último parpadeo no deje la pantalla con los colores invertidos
 }
 
 /*
@@ -629,11 +630,12 @@ void imprimirSecuencia(uint8_t caso){
 				  parpadeoSecuencia(caso, 3);
 				  if(t_diferencia > LIMITE_TERCERO){
 					  t_ref = HAL_GetTick(); //Actualización del valor de tiempo de referencia
-					  num_rep--;
+					  num_rep++;
 				  }
 			  }
 		  }
 	  }
+	  u8g2_SetDrawColor(&u8g2, 1); //Para que el último parpadeo no deje la pantalla con los colores invertidos
 }
 
 /*

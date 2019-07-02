@@ -17,6 +17,8 @@ typedef struct medidasSensores {  //Medidas tomadas por todos los sensores
 /*
  * Condiciones de cambio de estado
  */
+uint8_t medida_mal_alcohol(maq_estados* maquina_est);  //Devuelve 1 si la medida de alcohol se sale del rango establecido
+
 uint8_t medida_mal(maq_estados* maquina_est);  //Devuelve 1 si alguna medida se sale del rango establecido
 
 uint8_t medida_bien(maq_estados* maquina_est);  //Devuelve 1 si las medidas se encuentran en el rango establecido
@@ -39,14 +41,15 @@ uint8_t alerta_dada(maq_estados* maquina_est);
 /*
  * Acciones en estado destino
  */
-//void medirAlcohol(maq_estados* maquina_est);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
-float medirAlcohol(void);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
+void medirAlcohol(maq_estados* maquina_est);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
+//float medirAlcohol(void);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
 //float medirAlcohol(float ro);
 //void medirGSR(maq_estados* maquina_est);  //Mide la resistencia de la piel y almacena en la estructura el valor leído
 uint32_t medirGSR(void);  //Mide la resistencia de la piel y almacena en la estructura el valor leído
 void medirSensores(maq_estados* maquina_est);  //Activa todos los sensores excepto el sensor de alcohol y almacena en la estructura los valores detectados
-float calibracionAlcohol(void);
+//float calibracionAlcohol(void);
 //void imprimirMedidas(maq_estados* maquina_est);   //Saca por pantalla todas las medidas de los sensores
+uint8_t medirTensionPulso(void);
 
 void vibracion(void);    //Activa el motor para alertar mediante vibración
 

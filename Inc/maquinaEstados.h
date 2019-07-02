@@ -54,10 +54,10 @@ struct maq_estados{
 };
 
 //Crear una máquina de estados
-maq_estados* crear_maq(estado_maq* situ_maquina, maq_transiciones* trans_maquina);
+maq_estados* crear_maq(estado_maq* situ_maquina, maq_transiciones* trans_maquina, medidasSensores* medidas_sens);
 
 //Inicializar la máquina de estados
-void inicializar_maq(maq_estados* maquina_estados, estado_maq* situ_maquina, maq_transiciones* trans_maquina);
+void inicializar_maq(maq_estados* maquina_estados, estado_maq* situ_maquina, maq_transiciones* trans_maquina, medidasSensores* medidas_sens);
 
 //Ejecutar la máquina de estados
 void ejecutar_maq(maq_estados* maquina_estados);
