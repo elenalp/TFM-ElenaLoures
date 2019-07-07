@@ -49,7 +49,8 @@ uint32_t medirGSR(void);  //Mide la resistencia de la piel y almacena en la estr
 void medirSensores(maq_estados* maquina_est);  //Activa todos los sensores excepto el sensor de alcohol y almacena en la estructura los valores detectados
 //float calibracionAlcohol(void);
 //void imprimirMedidas(maq_estados* maquina_est);   //Saca por pantalla todas las medidas de los sensores
-uint8_t medirTensionPulso(void);
+//uint8_t medirTensionPulso(void);
+void medirTensionPulso(maq_estados* maquina_est);
 
 void vibracion(void);    //Activa el motor para alertar mediante vibración
 

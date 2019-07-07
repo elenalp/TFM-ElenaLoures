@@ -25,7 +25,6 @@
 #include "rtc.h"
 #include "gpio.h"
 
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -87,10 +86,12 @@ static maq_transiciones transi_posibles[16][4] = {
   {-1, NULL, -1, NULL },  //Caso de error, no hay funciones (punteros a null) y los estados origen y destino valen -1
 };
 
+/*estado_maq* situacion_maq;
+medidasSensores* medidas_sens;
+maq_estados* maquina_estados;
+*/
 
 /* USER CODE END PV */
-
-
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -138,14 +139,38 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
+  //estado_maq* situacion_maq;
+  //medidasSensores* medidas_sens;
+  maq_estados* maquina_estados;
+
+	/*
+	* Reset Hw a pantalla para que una vez que tenga alimentación esté a 0V y luego se ponga a Vcc
+	*/
+    HAL_GPIO_WritePin(TestPoint_output1_GPIO_Port, TestPoint_output1_Pin, GPIO_PIN_RESET);
+    HAL_Delay(10); //En ms
+    HAL_GPIO_WritePin(TestPoint_output1_GPIO_Port, TestPoint_output1_Pin, GPIO_PIN_SET);
+
   inicializarPantalla(); //Ejecutar todo lo necesario para poder utilizar la pantalla
 
-  estado_maq* situacion_maq;
-  medidasSensores* medidas_sens;
+  //estado_maq* situacion_maq;
+  //medidasSensores* medidas_sens;
   //estado_maq* situacion_maq[] = {{0,0,0}};
   //imprimirBasico(8);
   //HAL_Delay(1000); //En ms
-  maq_estados* maquina_estados = crear_maq(situacion_maq, transi_posibles, medidas_sens);
+  //maq_estados* maquina_estados = crear_maq(situacion_maq, transi_posibles, medidas_sens);
+  //maquina_estados = crear_maq(situacion_maq, transi_posibles, medidas_sens);
+  //maquina_estados = crear_maq(transi_posibles);
+
+//  maq_transiciones *transiciones_maq;
+//  transiciones_maq = &transi_posibles;
+
+  	//maq_transiciones* transiciones_maq;
+    //transiciones_maq = *transi_posibles;
+
+
+  maq_transiciones* transiciones_maq = &transi_posibles[0];
+
+  maquina_estados = crear_maq(transiciones_maq);
 
   //imprimirBasico(7);
    //HAL_Delay(1000); //En ms
@@ -153,7 +178,7 @@ int main(void)
 
  //imprimirPantalla();  //QUITAAAAAAAAAAR!!!
   /* USER CODE END 2 */
-// uint32_t t1 = HAL_GetTick();
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
@@ -181,10 +206,29 @@ int main(void)
   //imprimirBasico(9);
   //HAL_Delay(1000); //En ms
   //imprimirSecuencia(5);
+  //HAL_GPIO_WritePin(LED_test_GPIO_Port, LED_test_Pin, GPIO_PIN_RESET);
+  imprimirBasico(8);
+  HAL_Delay(1000); //En ms
+  //medirTensionPulso(maquina_estados);
+
+ 	HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
+ 	HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
+
+ 	MAX30101_setupPPG(0x0C, 4, 3, 400, 411, 4096);  //3 LEDs, 400 samples/second y 411 de ancho de pulso. Se bajó la potencia para adaptarlo a pieles claras
+ 		MAX30101_setPulseAmplitudeRed(0x02); //Turn Red LED to low to indicate sensor is running
+ 		MAX30101_setPulseAmplitudeGreen(0x00); //Turn off Green LED
+
+ 		float extremosPPG[2];
+
   while (1)
   {
 
-	  ejecutar_maq(maquina_estados);
+	  //ejecutar_maq(maquina_estados);
+
+	  calculoPulso(maquina_estados, extremosPPG);
+	  //calculoTension(maquina_estados, extremosPPG);
+
+
 
 //ro = 1000;
 	 // imprimirSecuencia(6);
@@ -229,16 +273,8 @@ int main(void)
 
 //	  HAL_GPIO_TogglePin(LED_test_GPIO_Port, LED_test_Pin);
 //	  HAL_Delay(180);
-	/* USER CODE END WHILE */
-	/*  if(HAL_GetTick()-t1 < 400){
-		  imprimirPantalla(1);  //QUITAAAAAAAAAAR!!!
-	  }else{
-		  imprimirPantalla(0);
-		  if(HAL_GetTick()-t1 > 600){
-			  t1 = HAL_GetTick();
-			  HAL_GPIO_TogglePin(LED_test_GPIO_Port, LED_test_Pin);
-		  }
-	  }*/
+    /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
 
 	  //Prueba parpadeo LED

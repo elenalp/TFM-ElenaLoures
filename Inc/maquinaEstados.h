@@ -32,7 +32,7 @@ typedef struct maq_transiciones{
 } maq_transiciones;
 
 //Medidas tomadas por todos los sensores
-typedef struct medidasSensores {
+typedef struct medidasSensores{
 	float alcohol;       //Medida de la concentración de alcohol obtenida del alcoholímetro
 	uint32_t tension_sis;       //Medida de la tensión arterial obtenida del AFE (sistólica)
 	uint32_t tension_dia;       //Medida de la tensión arterial obtenida del AFE (diastólica)
@@ -54,7 +54,8 @@ struct maq_estados{
 };
 
 //Crear una máquina de estados
-maq_estados* crear_maq(estado_maq* situ_maquina, maq_transiciones* trans_maquina, medidasSensores* medidas_sens);
+//maq_estados* crear_maq(estado_maq* situ_maquina, maq_transiciones* trans_maquina, medidasSensores* medidas_sens);
+maq_estados* crear_maq(maq_transiciones* trans_maquina);
 
 //Inicializar la máquina de estados
 void inicializar_maq(maq_estados* maquina_estados, estado_maq* situ_maquina, maq_transiciones* trans_maquina, medidasSensores* medidas_sens);

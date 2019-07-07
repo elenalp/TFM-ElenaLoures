@@ -58,6 +58,9 @@ void inicializarPantalla(void){
 	u8g2_InitDisplay(&u8g2);
 	u8g2_SetPowerSave(&u8g2, 0);
 
+	//Rotar 180 grados
+	u8g2_SetDisplayRotation(&u8g2, U8G2_R2);
+
 }
 
 /*
@@ -685,14 +688,17 @@ void imprimirAviso(maq_estados* maquina_est, int tipoAviso){
  */
 void imprimirPruebas(uint8_t sensor, float valor1, float valor2){
 	//char  alcohol[16], tension_sis[16], tension_dia[16], pulso[16], temperatura[16], estres[16], tension[16];
-	char  tension_sis[32], tension_dia[32], tension[64], valor[64];
+	char  tension_sis[32], tension_dia[32], tension[64], valor[64], valor_aux[64];
 	float valor_float;
 
 	//Pasar a char los valores recogidos por los sensores
-	if(sensor == 3){
+	if(sensor == 3){  //Para la temperatura
 		valor_float = (float)((float)valor1*0.00390625);
 		sprintf(valor, "%d.%.1d", (int16_t)valor_float, abs((int16_t)((valor_float-(int16_t)valor_float)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
 
+	}else if(sensor == 10){
+		sprintf(valor, "%d.%.3d", (int16_t)valor1, abs((int16_t)((valor1-(int16_t)valor1)*1000.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
+		sprintf(valor_aux, "%d.%.3d", (int16_t)valor2, abs((int16_t)((valor2-(int16_t)valor2)*1000.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
 	}else{
 		//sprintf(valor, "%lu", valor1);  //Hacer cast de int a char
 		sprintf(valor, "%d.%.3d", (int16_t)valor1, abs((int16_t)((valor1-(int16_t)valor1)*1000.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
@@ -741,7 +747,8 @@ void imprimirPruebas(uint8_t sensor, float valor1, float valor2){
 				u8g2_DrawStr(&u8g2, 60, 20, valor);  //Alcohol
 				break;
 			case 1:
-				u8g2_DrawStr(&u8g2, 60, 31, tension);  //Tensión
+				//u8g2_DrawStr(&u8g2, 60, 31, tension);  //Tensión
+				u8g2_DrawStr(&u8g2, 60, 31, valor_aux);  //Tensión
 				break;
 			case 2:
 				u8g2_DrawStr(&u8g2, 60, 42, valor);  //Pulso
@@ -751,6 +758,10 @@ void imprimirPruebas(uint8_t sensor, float valor1, float valor2){
 				break;
 			case 4:
 				u8g2_DrawStr(&u8g2, 60, 64, valor);  //Estrés
+				break;
+			case 10:
+				u8g2_DrawStr(&u8g2, 60, 31, valor_aux);  //Tensión
+				u8g2_DrawStr(&u8g2, 60, 42, valor);  //Pulso
 				break;
 		}
 		//u8g2_DrawStr(&u8g2, 60, 54, valor1);  //Temperatura
