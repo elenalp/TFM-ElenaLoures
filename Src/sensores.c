@@ -5,6 +5,7 @@
 #include "i2c.h"
 #include "ppg.h"
 #include <math.h>
+#include <string.h> //Para el strcpy
 
 #define INTERVALO_CALIB_ALCOHOL 500  //Milisegundos entre dos muestras del nivel de alcohol durante la calibración
 #define INTERVALO_MED_ALCOHOL 5  //Milisegundos entre dos muestras del nivel de alcohol durante la medida
@@ -48,10 +49,10 @@
 #define MAX_ESTRES "Alto" //Valor con el que hacer saltar la alerta por estrés
 #define MIN_DIF_GSR 0.1 //Mínima diferencia de valor de GSR con respecto a la referencia para considerar estrés normal
 #define MAX_DIF_GSR 0.4 //Máxim diferencia de valor de GSR con respecto a la referencia para considerar estrés normal
-#define MIN_DIF_PULSO 0.1 //Mínima diferencia de valor de pulso con respecto a la referencia para considerar estrés normal
-#define MAX_DIF_PULSO 0.4 //Máxima diferencia de valor de pulso con respecto a la referencia para considerar estrés normal
+#define MIN_DIF_PULSO 0.4 //Mínima diferencia de valor de pulso con respecto a la referencia para considerar estrés normal
+#define MAX_DIF_PULSO 0.8 //Máxima diferencia de valor de pulso con respecto a la referencia para considerar estrés normal
 #define MAX_TEMP 37.5  //Valor máximo de temperatura para que salte la alerta
-#define MIN_TEMP 35  //Valor mínimo de temperatura para que salte la alerta
+#define MIN_TEMP 34.5  //Valor mínimo de temperatura para que salte la alerta
 #define MAX_TENS_SIS 140  //Tensión sistólica a partir de la cual se considera tensión alta
 #define MIN_TENS_SIS 90  //Tensión sistólica a partir de la cual se considera tensión baja
 #define MAX_TENS_DIAS 90  //Tensión diastólica a partir de la cual se considera tensión alta
@@ -59,11 +60,12 @@
 #define DIR_TEMP 0X90  //Dirección del sensor de temperatura como esclavo I2C
 #define DIR_PPG 0XAE  //Dirección del AFE como esclavo I2C
 #define NUM_BYTES_PPG 90 //Número de bytes leídos del AFE (en multi-LED se tienen 3 bytes por cada canal, cada LED)
-#define ESPERA_PANTALLA 2000  //Tiempo de espera para que la pantalla se pueda ver (en milisegundos)
+#define ESPERA_PANTALLA 1000  //Tiempo de espera para que la pantalla se pueda ver (en milisegundos)
 #define POT_LEDS_PPG 0x0C //Potencia de LEDs para PPG
 #define NUM_MUESTRAS_MEDIA_PPG 4 //Número de muestras con que se hace la media para obtener la señal de PPG
 #define MODO_LEDS_PPG 3  //Para decidir cuántos LEDs encender y cuáles de ellos
 #define TASA_PPG 400  //Número de muestras por segundo (siendo "muestra" los 3 bytes del conjunto de todos los LEDs)
+//#define TASA_PPG 100  //Número de muestras por segundo (siendo "muestra" los 3 bytes del conjunto de todos los LEDs)
 #define ANCHO_PULSO_PPG 411  //Ancho de pulso para PPG
 #define RANGO_ADC_PPG 4096  //Para decidir cuántos bits de resolución tendrá la lectura
 #define AMPLI_ROJO_PPG 0x02  //Amplitud del LED rojo
@@ -71,7 +73,15 @@
 #define AMPLI_VERDE_PPG 0X00  //Amplitud del LED verde
 #define RATE_SIZE 4 //Increase this for more averaging. 4 is good
 #define NUM_MEDIAS_TENSION 5 //Número de muestras usadas para obtener el valor de tensión arterial media
-#define FACTOR_CORRECCION_TENSION 0.16  //Factor de corrección adaptado a mi tensión (94/600)
+//#define FACTOR_CORRECCION_TENSION 0.16  //Factor de corrección adaptado a mi tensión (94 medidos en tensiómetro/600 valor leído del PPG sin corregir)
+#define FACTOR_CORRECCION_TENSION 0.2  //Factor de corrección adaptado a mi tensión (94 medidos en tensiómetro/600 valor leído del PPG sin corregir)
+#define OFFSET_TEMP 1  //Factor de corrección de la temperatura corporal en grados
+#define FACTOR_CORRECCION_TEMP 0.00390625  //Factor de corrección de la lectura de temperatura
+#define RETARDO_VIBRACION 2000  //Tiempo en milisegundos entre vibración y no vibración
+#define NUM_REPETICIONES_VIBRAR 10  //Número de veces que vibra y deja de vibrar el motor
+#define MIN_BATERIA 30 //Porcentaje de batería a partir del que se considera batería baja. Con un 30% aproximadamente tiene 3,5V
+#define DURACION_ALERTA 2000  //Tiempo en milisegundos que debe esperarse para dejar de mostrar la alerta
+
 
 //BORRAAAAAAAAAAAAAAAAAAAAAAAAAR!!!!
 //const uint8_t RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
@@ -153,7 +163,7 @@ float calibracionAlcohol(maq_estados* maquina_est){
 		valorADC1 = (float)HAL_ADC_GetValue(&hadc1);  //ADC_IN8, nivel batería
 		//HAL_ADC_GetValue(&hadc1);  //ADC_IN8, nivel batería
 
-	//			medirBateria(maquina_est, valorADC1);
+		medirBateria(maquina_est, valorADC1);
 
 		HAL_ADC_PollForConversion(&hadc1, TIMEOUT_ADC);
 		valor_calibracion = valor_calibracion + (float)HAL_ADC_GetValue(&hadc1);  //ADC_IN9, nivel alcohol
@@ -241,7 +251,7 @@ void medirAlcohol(maq_estados* maquina_est){
 
 		HAL_ADC_PollForConversion(&hadc1, TIMEOUT_ADC);
 		valorADC1 = (float)HAL_ADC_GetValue(&hadc1);  //ADC_IN8, nivel batería
-	//			medirBateria(maquina_est, valorADC1);
+		medirBateria(maquina_est, valorADC1);
 
 		HAL_ADC_PollForConversion(&hadc1, TIMEOUT_ADC);
 		valorADC2 = valorADC2 + (float)HAL_ADC_GetValue(&hadc1);  //ADC_IN9, nivel alcohol
@@ -372,7 +382,7 @@ void calibracionGSR(maq_estados* maquina_est){
 	float ref_GSR;
 
 	for(i=0; i<MUESTRAS_CALIB_GSR; i++){
-		ref_GSR = ref_GSR + (float)medirGSR();
+		ref_GSR = ref_GSR + (float)medirGSR(maquina_est);
 	}
 
 	ref_GSR = (float)(ref_GSR/(float)MUESTRAS_CALIB_GSR);
@@ -382,9 +392,32 @@ void calibracionGSR(maq_estados* maquina_est){
 
 //Toma la medida del pulso en estado de reposo como referencia para el cálculo del estres posterior
 void calibracionPulso(maq_estados* maquina_est){
-	float refPulso;
-	//TO-DO!!!!
-	maquina_est->medidas_sens->refPulso = refPulso;
+	/*float refPulso;
+
+	medirTensionPulso(maquina_est);
+
+	refPulso = maquina_est->medidas_sens->pulso;
+
+	maquina_est->medidas_sens->refPulso = refPulso;*/
+
+	/*
+	 * Activar 5V y 1,8V
+	 */
+	HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
+
+	HAL_Delay(250);
+
+	inicializarPPG(POT_LEDS_PPG, NUM_MUESTRAS_MEDIA_PPG, MODO_LEDS_PPG, TASA_PPG, ANCHO_PULSO_PPG, RANGO_ADC_PPG, AMPLI_ROJO_PPG, AMPLI_IR_PPG, AMPLI_VERDE_PPG);
+
+
+	do{
+		medirTensionPulso(maquina_est);
+	}while((maquina_est->medidas_sens->pulso < 50)||(maquina_est->medidas_sens->pulso > 300));
+
+
+	maquina_est->medidas_sens->refPulso = maquina_est->medidas_sens->pulso;
+
 }
 
 /*
@@ -401,14 +434,14 @@ void medirSensores(maq_estados* maquina_est){
 	//imprimirBasico(7);
 	//HAL_Delay(ESPERA_PANTALLA);
 
-	calibracionGSR(maquina_est);
-	calibracionPulso(maquina_est);
+//	calibracionGSR(maquina_est);
+	//calibracionPulso(maquina_est);
 
-//	medirTensionPulso(maquina_est);
+	medirTensionPulso(maquina_est);
 	medirTemp(maquina_est);
 	medirBateria(maquina_est, valorADC1);
 	medirEstres(maquina_est);
-	//	imprimirMedidas();  //Pantalla de medidas de sensores
+	//imprimirMedidas(maquina_est);  //Pantalla de medidas de sensores
 }
 
 /*
@@ -428,9 +461,9 @@ void imprimirAviso(maq_estados* maquina_est, int tipoAviso){
 */
 
 //Realiza la medición de la temperatura corporal
-void medirTemp(maq_estados* maquina_est){}
-uint32_t medirTemp1(void){
-	uint32_t temp;
+void medirTemp(maq_estados* maquina_est){
+//uint32_t medirTemp1(void){
+	float temp, temp_ponderada;
 	uint8_t bufferTemp[2];  //Buffer de datos a enviar y leer por I2C
 	bufferTemp[0] = 0x01; //Dirección de registro de configuración
 	bufferTemp[1] = 0x00; //Contenido a enviar al registro de configuración
@@ -446,16 +479,23 @@ uint32_t medirTemp1(void){
 	  temp = bufferTemp[0]*256 + bufferTemp[1];  //Primero devuelve el más significativo, como son 8 bits cada registro, para obtener el valor de ambos bytes hay que multiplicar el primero por 256
 
 	 // temp = temp * 0.00390625;  // Porque cada bit no vale 1ºC sino esos grados
+
+	  temp_ponderada = (float)(temp*(float)FACTOR_CORRECCION_TEMP);
+	  temp_ponderada = (float)(temp_ponderada + OFFSET_TEMP);
+
 //	}
 	  //imprimirSecuencia(6);
 	 //imprimirAlertaSensor(187, 45, 1);
 	//		  imprimirAlertaSensor(temp, 45, 1);
-	return temp;
+
+	 maquina_est->medidas_sens->temperatura = temp_ponderada;
+//	 imprimirMedidas(maquina_est);
+	//return temp;
 }
 
 //Mide la resistencia de la piel y almacena en la estructura el valor leído
 //void medirGSR(maq_estados* maquina_est){
-uint32_t medirGSR(void){
+uint32_t medirGSR(maq_estados* maquina_est){
 	uint32_t valorADC1, valorADC3;
 
 	HAL_ADC_Start(&hadc1);
@@ -463,7 +503,7 @@ uint32_t medirGSR(void){
 	HAL_ADC_PollForConversion(&hadc1, TIMEOUT_ADC);
 	valorADC1 = HAL_ADC_GetValue(&hadc1);  //ADC_IN8, nivel batería
 	//HAL_ADC_GetValue(&hadc1);  //ADC_IN8, nivel batería
-	//medirBateria(maquina_est, valorADC1);
+	medirBateria(maquina_est, valorADC1);
 
 	HAL_ADC_PollForConversion(&hadc1, TIMEOUT_ADC);
 	HAL_ADC_GetValue(&hadc1);  //ADC_IN9, nivel alcohol
@@ -516,17 +556,17 @@ void medirTensionPulso(maq_estados* maquina_est){
 	/*
 	 * Activar 5V y 1,8V
 	 */
-	HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
+	//HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
+	//HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
 
-	inicializarPPG(POT_LEDS_PPG, NUM_MUESTRAS_MEDIA_PPG, MODO_LEDS_PPG, TASA_PPG, ANCHO_PULSO_PPG, RANGO_ADC_PPG, AMPLI_ROJO_PPG, AMPLI_IR_PPG, AMPLI_VERDE_PPG);
+	//inicializarPPG(POT_LEDS_PPG, NUM_MUESTRAS_MEDIA_PPG, MODO_LEDS_PPG, TASA_PPG, ANCHO_PULSO_PPG, RANGO_ADC_PPG, AMPLI_ROJO_PPG, AMPLI_IR_PPG, AMPLI_VERDE_PPG);
 
 	//sense.head = 0;
 
 	calculoPulso(maquina_est, extremosPPG);
-	calculoTension(maquina_est, extremosPPG);
+	//calculoTension(maquina_est, extremosPPG);
 
-
+	//imprimirMedidas(maquina_est);
 }
 
 //Mide el nivel de estrés a partir del pulso y el GSR
@@ -535,8 +575,9 @@ void medirEstres(maq_estados* maquina_est){
 	uint32_t gsr;
 	float pulso, ref_GSR, dif_GSR, refPulso, difPulso;
 
-	gsr = medirGSR();
+	gsr = medirGSR(maquina_est);
 //	pulso = medirPulso();
+	pulso = maquina_est->medidas_sens->pulso;
 
 	ref_GSR = maquina_est->medidas_sens->ref_GSR;
 	refPulso = maquina_est->medidas_sens->refPulso;
@@ -563,8 +604,6 @@ void medirEstres(maq_estados* maquina_est){
 	}else{
 		strcpy(maquina_est->medidas_sens->estres, "Normal");
 	}
-
-	//TO-DO PONER MÁRGENES DE PULSOS POR DIFERENCIAS IGUAL QUE GSR!!!
 }
 
 //Estima la batería que tiene
@@ -666,6 +705,11 @@ void calculoPulso(maq_estados* maquina_est, float extremosPPG[2]){
 
 	//printf("IR: %d\n", irValue); //OJO, sin \n no imprime nada
 
+	/*
+	 * Para medir la frecuencia con que se leen los sensores con el osciloscopio
+	 */
+	//HAL_GPIO_TogglePin(TestPoint_output2_GPIO_Port, TestPoint_output2_Pin);
+
 	uint8_t beat = MAX30101_checkForBeat(irValue, extremosPPG);
 	if(beat == 1){
 		//We sensed a beat!
@@ -688,14 +732,16 @@ void calculoPulso(maq_estados* maquina_est, float extremosPPG[2]){
 
 	//	imprimirLatidos(irValue, beatsPerMinute, beatAvg);
 
+		maquina_est->medidas_sens->medida_mala = 10; //Para garantizar que no da una medida mala constante porque no detectó pulso
+
 		maquina_est->medidas_sens->pulso = beatAvg;
 		calculoTension(maquina_est, extremosPPG);
 //PARA PRUEBAS!!!!!!
 		//imprimirPruebas(2, maquina_est->medidas_sens->pulso, 0);
 		//imprimirPruebas(2, beatAvg, 0);
 		  //HAL_Delay(2000); //En ms
-		imprimirPruebas(10, maquina_est->medidas_sens->pulso, maquina_est->medidas_sens->tension_sis);
-
+		//imprimirPruebas(10, maquina_est->medidas_sens->pulso, maquina_est->medidas_sens->tension_sis);
+		imprimirMedidas(maquina_est);
 	}
 }
 
@@ -724,7 +770,8 @@ uint8_t rangoAlcohol(maq_estados* maquina_est){
 
 //Devuelve si la medida de estrés está o no dentro del rango
 uint8_t rangoEstres(maq_estados* maquina_est){
-	if(maquina_est->medidas_sens->estres == MAX_ESTRES){  //Medida fuera de rango
+	//if(maquina_est->medidas_sens->estres == MAX_ESTRES){  //Medida fuera de rango
+	if((strcmp(maquina_est->medidas_sens->estres, MAX_ESTRES) == 0)&&(maquina_est->medidas_sens->medida_mala != 5)){  //Medida fuera de rango. Comparar ambos strings
 		maquina_est->medidas_sens->medida_mala = 5;  //Marcar como mala la medida del estrés
 		return 0;
 	}else{  //Medida dentro del rango
@@ -740,9 +787,11 @@ uint8_t rangoPulso(maq_estados* maquina_est){
 	pulso = maquina_est->medidas_sens->pulso;
 	ref_pulso = maquina_est->medidas_sens->refPulso;
 
-	dif_pulso = (float)((pulso-ref_pulso)/ref_pulso);
+	dif_pulso = fabsf((float)((pulso-ref_pulso)/ref_pulso));
 
-	if((dif_pulso >= MAX_DIF_PULSO)||(dif_pulso <= MIN_DIF_PULSO)){  //Medida fuera de rango
+	//if((dif_pulso >= MAX_DIF_PULSO)||(dif_pulso <= MIN_DIF_PULSO)){  //Medida fuera de rango
+	//if((dif_pulso >= MAX_DIF_PULSO)){  //Medida fuera de rango
+	if((dif_pulso >= MAX_DIF_PULSO)&&(maquina_est->medidas_sens->medida_mala != 3)){  //Medida fuera de rango y la última alerta no fue del pulso
 		maquina_est->medidas_sens->medida_mala = 3;  //Marcar como mala la medida de pulso
 		return 0;
 	}else{  //Medida dentro del rango
@@ -752,12 +801,23 @@ uint8_t rangoPulso(maq_estados* maquina_est){
 
 //Devuelve si la medida de la tensión está o no dentro del rango
 uint8_t rangoTension(maq_estados* maquina_est){
-	uint32_t tension_sis, tension_dias;
+	/*uint32_t tension_sis, tension_dias;
 
 	tension_sis = maquina_est->medidas_sens->tension_sis;
 	tension_dias = maquina_est->medidas_sens->tension_dia;
 
 	if((tension_sis >= MAX_TENS_SIS)||(tension_sis <= MIN_TENS_SIS)||(tension_dias <= MAX_TENS_DIAS)||(tension_dias <= MIN_TENS_DIAS)){  //Medida fuera de rango
+		maquina_est->medidas_sens->medida_mala = 2;  //Marcar como mala la medida de tensión
+		return 0;
+	}else{  //Medida dentro del rango
+		return 1;
+	}*/
+
+	uint32_t tension_sis;
+
+	tension_sis = maquina_est->medidas_sens->tension_sis;
+
+	if((tension_sis >= MAX_TENS_SIS)||(tension_sis <= MIN_TENS_SIS)){  //Medida fuera de rango
 		maquina_est->medidas_sens->medida_mala = 2;  //Marcar como mala la medida de tensión
 		return 0;
 	}else{  //Medida dentro del rango
@@ -850,11 +910,18 @@ uint8_t medida_mal(maq_estados* maquina_est){
 //Devuelve 1 si la medida de alcohol se encuentran en el rango establecido
 uint8_t medida_bien(maq_estados* maquina_est){
 	//PARA PRUEBAS!!!
-		imprimirBasico(8);
-		HAL_Delay(ESPERA_PANTALLA);
+		//imprimirBasico(8);
+		//HAL_Delay(ESPERA_PANTALLA);
 	//HAL_GPIO_TogglePin(LED_test_GPIO_Port, LED_test_Pin);
 	//HAL_GPIO_WritePin(LED_test_GPIO_Port, LED_test_Pin, GPIO_PIN_SET);
-	return rangoAlcohol(maquina_est);
+	//return rangoAlcohol(maquina_est);
+	if(rangoAlcohol(maquina_est)){
+		calibracionGSR(maquina_est);
+		calibracionPulso(maquina_est);
+		return 1;
+	}else{
+		return 0;
+	}
 
 	/*if(maquina_est->medidas_sens->alcohol < MAX_ALCOHOL){
 		return 1;
@@ -867,34 +934,77 @@ uint8_t medida_bien(maq_estados* maquina_est){
 //Activa el motor para alertar mediante vibración
 void vibracion(void){
 
+	int i;
+
+	/*for(i = 0; i < NUM_REPETICIONES_VIBRAR; i++){
+		HAL_GPIO_WritePin(MotorON_OFF_GPIO_Port, MotorON_OFF_Pin, GPIO_PIN_SET);
+		HAL_Delay(RETARDO_VIBRACION);
+		HAL_GPIO_WritePin(MotorON_OFF_GPIO_Port, MotorON_OFF_Pin, GPIO_PIN_RESET);
+	}*/
+
+	//HAL_GPIO_WritePin(MotorON_OFF_GPIO_Port, MotorON_OFF_Pin, GPIO_PIN_SET);
+	//HAL_Delay(RETARDO_VIBRACION);
+
+	for(i = 0; i < NUM_REPETICIONES_VIBRAR; i++){
+		HAL_GPIO_TogglePin(MotorON_OFF_GPIO_Port, MotorON_OFF_Pin);
+		HAL_Delay(RETARDO_VIBRACION);
+
+	}
+
+	HAL_GPIO_WritePin(MotorON_OFF_GPIO_Port, MotorON_OFF_Pin, GPIO_PIN_RESET); //Para asegurar que no se quede vibrando
 }
 
 //Imprime por pantalla el parámetro por el cual se realiza la alerta y activa la vibración
 void imprimirYvibrar(maq_estados* maquina_est){
 	//LLAMAR A LA FUNCIÓN DE ALERTA DE PANTALLA.C Y A VIBRACION()
 
+	imprimirAviso(maquina_est, 5);
 	vibracion();
 	//imprimirAlertaSensor(maquina_est->medidas_sens, maquina_est->medidas_sens->medida_mala);
-	imprimirAviso(maquina_est, 5);
+	//imprimirAviso(maquina_est, 5);
 }
 
 
-uint8_t bat_baja(maq_estados* maquina_est){}  //Devuelve 1 si el nivel de la batería se encuentra por debajo del umbral establecido
+uint8_t bat_baja(maq_estados* maquina_est){
+
+	return (maquina_est->nivel_bateria <= MIN_BATERIA);
+}  //Devuelve 1 si el nivel de la batería se encuentra por debajo del umbral establecido
 
 //Devuelve 1 si se ha puesto a cargar el sistema
 uint8_t conectado(maq_estados* maquina_est){
 	return !HAL_GPIO_ReadPin(TestPoint_input_GPIO_Port, TestPoint_input_Pin);
 }
 
-uint8_t alerta_medir_dada(maq_estados* maquina_est){}  //Devuelve 1 si dio la alerta tras una medida fuera de rango
+//Devuelve 1 si dio la alerta tras una medida fuera de rango
+uint8_t alerta_medir_dada(maq_estados* maquina_est){
+	if(maquina_est->medidas_sens->medida_mala == 1){  //Para saber si la alerta fue por el alcohol
+		return 0;
+	}
+	return alerta_dada(maquina_est);
+}
 
-uint8_t alerta_alcohol_dada(maq_estados* maquina_est){}  //Devuelve 1 si dio la alerta tras una medida de nivel de alcohol fuera de rango
+//Devuelve 1 si dio la alerta tras una medida de nivel de alcohol fuera de rango
+uint8_t alerta_alcohol_dada(maq_estados* maquina_est){
+	return alerta_dada(maquina_est);
+}
 
 //Devuelve 0 si se ha dejado de cargar el sistema
 uint8_t desconectado(maq_estados* maquina_est){
 	return !conectado(maquina_est);
 }
 
-uint8_t sistema_ON(maq_estados* maquina_est){}
+uint8_t sistema_ON(maq_estados* maquina_est){
+	return 1; //Si no está encendido la máquina de estados no estaría funcionando
+}
 
-uint8_t alerta_dada(maq_estados* maquina_est){}
+uint8_t alerta_dada(maq_estados* maquina_est){
+	uint32_t t_inicial, t_final;
+	t_inicial = HAL_GetTick();
+	t_final = t_inicial;  //Para que al principio tenga un valor
+
+	while((t_final - t_inicial) < DURACION_ALERTA){  //Para obligar a que la alerta dure un tiempo
+		t_final = HAL_GetTick();
+	}
+
+	return 1;
+}

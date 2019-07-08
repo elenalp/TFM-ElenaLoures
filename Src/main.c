@@ -207,25 +207,25 @@ int main(void)
   //HAL_Delay(1000); //En ms
   //imprimirSecuencia(5);
   //HAL_GPIO_WritePin(LED_test_GPIO_Port, LED_test_Pin, GPIO_PIN_RESET);
-  imprimirBasico(8);
-  HAL_Delay(1000); //En ms
+  //imprimirBasico(8);
+//  HAL_Delay(1000); //En ms
   //medirTensionPulso(maquina_estados);
 
- 	HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
- 	HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
+ //	HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
+ //	HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
 
- 	MAX30101_setupPPG(0x0C, 4, 3, 400, 411, 4096);  //3 LEDs, 400 samples/second y 411 de ancho de pulso. Se bajó la potencia para adaptarlo a pieles claras
- 		MAX30101_setPulseAmplitudeRed(0x02); //Turn Red LED to low to indicate sensor is running
- 		MAX30101_setPulseAmplitudeGreen(0x00); //Turn off Green LED
+ //	MAX30101_setupPPG(0x0C, 4, 3, 400, 411, 4096);  //3 LEDs, 400 samples/second y 411 de ancho de pulso. Se bajó la potencia para adaptarlo a pieles claras
+ 	//	MAX30101_setPulseAmplitudeRed(0x02); //Turn Red LED to low to indicate sensor is running
+ 	//	MAX30101_setPulseAmplitudeGreen(0x00); //Turn off Green LED
 
- 		float extremosPPG[2];
+ 		//float extremosPPG[2];
 
   while (1)
   {
 
-	  //ejecutar_maq(maquina_estados);
+	  ejecutar_maq(maquina_estados);
 
-	  calculoPulso(maquina_estados, extremosPPG);
+	  //calculoPulso(maquina_estados, extremosPPG);
 	  //calculoTension(maquina_estados, extremosPPG);
 
 

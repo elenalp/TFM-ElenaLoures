@@ -1,7 +1,8 @@
 #include "maquinaEstados.h"
 #include <stdlib.h> //Para el malloc
+#include <string.h> //Para el strcpy
 //BORRAR!!!
-#include "main.h"
+//#include "main.h"
 
 //Crear una máquina de estados
 //maq_estados* crear_maq(estado_maq* situ_maquina, maq_transiciones* trans_maquina, medidasSensores* medidas_sens){
@@ -30,6 +31,13 @@ void inicializar_maq(maq_estados* maquina_estados, estado_maq* situ_maquina, maq
 	maquina_estados->situacion_maq->prev_estado = 0;
 	maquina_estados->situacion_maq->prox_estado = 0;
 
+	/*
+	 * Inicializaciones para que durante la calibración no salgan valores raros
+	 */
+	maquina_estados->medidas_sens->pulso = 0;  //Para que no salte la alerta por estrés si no detectó pulso
+	maquina_estados->medidas_sens->temperatura = 36;
+	strcpy(maquina_estados->medidas_sens->estres, "Bajo");
+
 	//maquina_estados->medidas_sens->medida_mala = 0;
 //	maquina_estados->medidas_sens->medida_mala = 30;   //Para saber que aún no se comprobó el nivel de alcohol
 /*	maquina_estados->medidas_sens->pulso = 0;
@@ -56,13 +64,13 @@ void ejecutar_maq(maq_estados* maquina_estados){
  			//imprimirBasico(4);
  			//HAL_Delay(1000); //En ms
  		//HAL_GPIO_WritePin(LED_test_GPIO_Port, LED_test_Pin, GPIO_PIN_SET);
- 		imprimirPruebas(0, maquina_estados->situacion_maq->estado_actual, 0);
- 		HAL_Delay(2000); //En ms
- 		imprimirPruebas(2, trans_posibles->estado_origen, 0);
- 		//if((maquina_estados->situacion_maq->estado_actual == trans_posibles->estado_origen) && trans_posibles->condic_cambio(maquina_estados)){  //Además de estar en la transición correcta (la que parte del estado en que está), debes ver si se cumple la condición para ir al estado destino
+ //		imprimirPruebas(0, maquina_estados->situacion_maq->estado_actual, 0);
+ 	//	HAL_Delay(2000); //En ms
+ 		//imprimirPruebas(2, trans_posibles->estado_origen, 0);
+ 		if((maquina_estados->situacion_maq->estado_actual == trans_posibles->estado_origen) && trans_posibles->condic_cambio(maquina_estados)){  //Además de estar en la transición correcta (la que parte del estado en que está), debes ver si se cumple la condición para ir al estado destino
 //		if((maquina_estados->situacion_maq->estado_actual == trans_posibles->estado_origen) & trans_posibles->condic_cambio(maquina_estados)){  //Además de estar en la transición correcta (la que parte del estado en que está), debes ver si se cumple la condición para ir al estado destino
- 		if((maquina_estados->situacion_maq->estado_actual == trans_posibles->estado_origen)){
- 			if(trans_posibles->condic_cambio(maquina_estados)){  //Además de estar en la transición correcta (la que parte del estado en que está), debes ver si se cumple la condición para ir al estado destino
+ 	//	if((maquina_estados->situacion_maq->estado_actual == trans_posibles->estado_origen)){
+ 		//	if(trans_posibles->condic_cambio(maquina_estados)){  //Además de estar en la transición correcta (la que parte del estado en que está), debes ver si se cumple la condición para ir al estado destino
 
 			//HAL_GPIO_WritePin(LED_test_GPIO_Port, LED_test_Pin, GPIO_PIN_SET);
 			//PARA PRUEBAS!!!
@@ -75,7 +83,7 @@ void ejecutar_maq(maq_estados* maquina_estados){
 	      	}
 
   		break;
- 			}
+ 			//}
     	}
  		//PARA PRUEBAS!!!
  				//imprimirBasico(8);
