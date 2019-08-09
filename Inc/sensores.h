@@ -3,16 +3,7 @@
 
 #include "maquinaEstados.h"
 
-/*
-typedef struct medidasSensores {  //Medidas tomadas por todos los sensores
-	double alcohol;       //Medida de la concentración de alcohol obtenida del alcoholímetro
-	double tension;       //Medida de la tensión arterial obtenida del AFE
-	double pulso;         //Medida del pulso obtenida del AFE
-	double temperatura;   //Medida de la temperatura corporal obtenida del sensor
-	double estres;        //Medida del nivel de estrés obtenida de la medida de GSR
 
-} medidasSensores;
-*/
 
 /*
  * Condiciones de cambio de estado
@@ -42,26 +33,21 @@ uint8_t alerta_dada(maq_estados* maquina_est);
  * Acciones en estado destino
  */
 void medirAlcohol(maq_estados* maquina_est);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
-//float medirAlcohol(void);  //Activa el sensor de alcohol y almacena en la estructura el valor detectado
-//float medirAlcohol(float ro);
-//void medirGSR(maq_estados* maquina_est);  //Mide la resistencia de la piel y almacena en la estructura el valor leído
-//uint32_t medirGSR(void);  //Mide la resistencia de la piel y almacena en la estructura el valor leído
-uint32_t medirGSR(maq_estados* maquina_est);
+
+uint32_t medirGSR(maq_estados* maquina_est);  //Mide la resistencia de la piel y almacena en la estructura el valor leído
+
 void medirSensores(maq_estados* maquina_est);  //Activa todos los sensores excepto el sensor de alcohol y almacena en la estructura los valores detectados
-//float calibracionAlcohol(void);
-//void imprimirMedidas(maq_estados* maquina_est);   //Saca por pantalla todas las medidas de los sensores
-//uint8_t medirTensionPulso(void);
+
 void medirTensionPulso(maq_estados* maquina_est);
-//void inicializarPPG(uint8_t potenciaLED, uint8_t mediaMuestras, uint8_t modoLEDs, int tasaMuestreo, int anchoPulso, int rangoADC, uint8_t amplitudRojo, uint8_t amplitudIR, uint8_t amplitudVerde);
+
 void vibracion(void);    //Activa el motor para alertar mediante vibración
 
 void imprimirYvibrar(maq_estados* maquina_est);   //Imprime por pantalla el parámetro por el cual se realiza la alerta y activa la vibración
 
 void inicializarPPG(uint8_t potenciaLED, uint8_t mediaMuestras, uint8_t modoLEDs, int tasaMuestreo, int anchoPulso, int rangoADC, uint8_t amplitudRojo, uint8_t amplitudIR, uint8_t amplitudVerde);
-//void imprimirAviso(maq_estados* maquina_est, int tipoAviso);  //Imprime un mensaje por pantalla en función del aviso tipoAviso=0 si se inicia el sistema y se va a medir el nivel de alcohol, tipoAviso=1 si batería baja, tipoAviso=2 si se ha conectado para cargar y tipoAviso=3 si se carga estando encendido
 
 //void medirTemp(maq_estados* maquina_est);   //Realiza la medición de la temperatura corporal
-uint32_t medirTemp1(void);
+uint32_t medirTemp1(void);   //Realiza la medición de la temperatura corporal
 
 void medirBateria(maq_estados* maquina_est, uint32_t valorADC1);  //Estima la batería que tiene
 

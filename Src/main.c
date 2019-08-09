@@ -33,10 +33,6 @@
 #include "pantalla.h"
 
 
-//#include <stdio.h>
-//#include <stdlib.h>
-
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -86,10 +82,6 @@ static maq_transiciones transi_posibles[16][4] = {
   {-1, NULL, -1, NULL },  //Caso de error, no hay funciones (punteros a null) y los estados origen y destino valen -1
 };
 
-/*estado_maq* situacion_maq;
-medidasSensores* medidas_sens;
-maq_estados* maquina_estados;
-*/
 
 /* USER CODE END PV */
 
@@ -139,8 +131,6 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
-  //estado_maq* situacion_maq;
-  //medidasSensores* medidas_sens;
   maq_estados* maquina_estados;
 
 	/*
@@ -152,134 +142,27 @@ int main(void)
 
   inicializarPantalla(); //Ejecutar todo lo necesario para poder utilizar la pantalla
 
-  //estado_maq* situacion_maq;
-  //medidasSensores* medidas_sens;
-  //estado_maq* situacion_maq[] = {{0,0,0}};
-  //imprimirBasico(8);
-  //HAL_Delay(1000); //En ms
-  //maq_estados* maquina_estados = crear_maq(situacion_maq, transi_posibles, medidas_sens);
-  //maquina_estados = crear_maq(situacion_maq, transi_posibles, medidas_sens);
-  //maquina_estados = crear_maq(transi_posibles);
-
-//  maq_transiciones *transiciones_maq;
-//  transiciones_maq = &transi_posibles;
-
-  	//maq_transiciones* transiciones_maq;
-    //transiciones_maq = *transi_posibles;
-
 
   maq_transiciones* transiciones_maq = &transi_posibles[0];
 
   maquina_estados = crear_maq(transiciones_maq);
 
-  //imprimirBasico(7);
-   //HAL_Delay(1000); //En ms
-  //wait(500);
-
- //imprimirPantalla();  //QUITAAAAAAAAAAR!!!
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  //uint32_t temp;
-  /*uint8_t bufferTemp[2];  //Buffer de datos a enviar y leer por I2C
-  bufferTemp[0] = 0x01; //Dirección de registro de configuración
-  bufferTemp[1] = 0x00; //Contenido a enviar al registro de configuración
-  while(HAL_I2C_IsDeviceReady(&hi2c3, 0X90, 2, 10) != HAL_OK);
-  HAL_I2C_Master_Transmit(&hi2c3, 0x90, bufferTemp, 2, 10);*/
-  //float alcohol, ro;
-  //float gsr;
-
-// HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
-// HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
-
-// uint8_t ppg;
-
- // HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
-  //HAL_Delay(18000); //Para que caliente el heater
- // HAL_GPIO_WritePin(HeaterON_OFF_GPIO_Port, HeaterON_OFF_Pin, GPIO_PIN_SET);  //Poner a 1 HeaterON_OFF
- // ro = calibracionAlcohol();
-  //ro=1200;
-  //imprimirPruebas(0, ro, 0);
-  //HAL_Delay(3000); //En ms
-  //imprimirBasico(9);
-  //HAL_Delay(1000); //En ms
-  //imprimirSecuencia(5);
-  //HAL_GPIO_WritePin(LED_test_GPIO_Port, LED_test_Pin, GPIO_PIN_RESET);
-  //imprimirBasico(8);
-//  HAL_Delay(1000); //En ms
-  //medirTensionPulso(maquina_estados);
-
- //	HAL_GPIO_WritePin(EnableSW_5V_GPIO_Port, EnableSW_5V_Pin, GPIO_PIN_SET);
- //	HAL_GPIO_WritePin(EnableLIN_1V8_GPIO_Port, EnableLIN_1V8_Pin, GPIO_PIN_SET);
-
- //	MAX30101_setupPPG(0x0C, 4, 3, 400, 411, 4096);  //3 LEDs, 400 samples/second y 411 de ancho de pulso. Se bajó la potencia para adaptarlo a pieles claras
- 	//	MAX30101_setPulseAmplitudeRed(0x02); //Turn Red LED to low to indicate sensor is running
- 	//	MAX30101_setPulseAmplitudeGreen(0x00); //Turn off Green LED
-
- 		//float extremosPPG[2];
 
   while (1)
   {
 
 	  ejecutar_maq(maquina_estados);
 
-	  //calculoPulso(maquina_estados, extremosPPG);
-	  //calculoTension(maquina_estados, extremosPPG);
 
-
-
-//ro = 1000;
-	 // imprimirSecuencia(6);
-
-	  //temp = medirTemp1();
-	  //imprimirBasico(4);
-	 /* FILE * fp;
-
-	     fp = fopen ("fileprueba.txt", "w+");
-	     fprintf(fp, "%s %s %s %d", "We", "are", "in", 2012);
-
-	     fclose(fp);*/
-
-	 // gsr = medirGSR();
-	  //alcohol = medirAlcohol();
-	 // alcohol = 4.5;
-//	  alcohol = calibracionAlcohol();
-
-	  /*bufferTemp[0] = 0x00; //Dirección de registro de temperatura
-	  HAL_I2C_Master_Transmit(&hi2c3, 0x90, bufferTemp, 1, 10);
-	  HAL_I2C_Master_Receive(&hi2c3, 0x90, bufferTemp, 2, 10);
-
-	  temp = bufferTemp[0]*256 + bufferTemp[1];  //Primero devuelve el más significativo, como son 8 bits cada registro, para obtener el valor de ambos bytes hay que multiplicar el primero por 256
-
-	 temp = temp * 0.00390625;  // Porque cada bit no vale 1ºC sino esos grados
-	  //temp = 0x100;
-	  //imprimirSecuencia(6);
-	 //imprimirAlertaSensor(187, 45, 1);
-//	  imprimirAlertaSensor(temp, 45, 1);*/
-	  //imprimirPruebas(3, temp, 0);
-//	  imprimirPruebas(3, 90, 0);
-//	  imprimirPruebas(0, alcohol, 0);
-	  //imprimirPruebas(4, gsr, 0);
-
-//	  ppg = medirTensionPulso();
-//	  imprimirPruebas(4, ppg, 0);
-
-	  /*//PARA PRUEBAS!!!
-	  HAL_Delay(3000); //En ms
-	  imprimirBasico(4);
-	  HAL_Delay(3000); //En ms*/
-
-//	  HAL_GPIO_TogglePin(LED_test_GPIO_Port, LED_test_Pin);
-//	  HAL_Delay(180);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
-	  //Prueba parpadeo LED
-/*	  HAL_GPIO_TogglePin(LED_test_GPIO_Port, LED_test_Pin);
-	  HAL_Delay(250);*/
   }
   /* USER CODE END 3 */
 }

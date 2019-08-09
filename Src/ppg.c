@@ -43,7 +43,6 @@ int16_t MAX30101_averageDCEstimator(int32_t *p, uint16_t x)
 }
 
 //  Low Pass FIR Filter
-//  Low Pass FIR Filter
 int16_t MAX30101_lowPassFIRFilter(int16_t din)
 {
   cbuf[offset] = din;

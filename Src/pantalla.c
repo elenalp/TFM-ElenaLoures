@@ -365,7 +365,6 @@ void parpadeoSecuencia(uint8_t caso, uint8_t icono_mostrado){
  * Saca por pantalla todas las medidas de los sensores
  * Pantalla en la que se muestran todas las medidas de todos los sensores
  */
-//void imprimirSensores(maq_estados* maquina_est){
 void imprimirMedidas(maq_estados* maquina_est){
 	char  alcohol[16], tension_sis[32], tension_dia[16], pulso[16], temperatura[16], estres[16], tension[64];
 	//float temperatura_ponderada;
@@ -381,20 +380,12 @@ void imprimirMedidas(maq_estados* maquina_est){
 		u8g2_DrawStr(&u8g2, 0, 64, "Estrés:");
 
 		//Pasar a char los valores recogidos por los sensores
-
-		/*sprintf(alcohol, "%lu", maquina_est->medidas_sens->alcohol);  //Hacer cast de int a char
-		sprintf(tension_sis, "%lu", maquina_est->medidas_sens->tension_sis);  //Hacer cast de int a char
-		sprintf(tension_dia, "%lu", maquina_est->medidas_sens->tension_dia);  //Hacer cast de int a char
-		sprintf(pulso, "%lu", maquina_est->medidas_sens->pulso);  //Hacer cast de int a char
-		sprintf(temperatura, "%lu", maquina_est->medidas_sens->temperatura);  //Hacer cast de int a char*/
-
 		sprintf(alcohol, "%d.%.3d", (int16_t)maquina_est->medidas_sens->alcohol, abs((int16_t)((maquina_est->medidas_sens->alcohol-(int16_t)maquina_est->medidas_sens->alcohol)*1000.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
-		//sprintf(tension_sis, "%d.%.3d", (int16_t)maquina_est->medidas_sens->tension_sis, abs((int16_t)((maquina_est->medidas_sens->tension_sis-(int16_t)maquina_est->medidas_sens->tension_sis)*1000.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
+		
 		sprintf(tension_sis, "%d", (uint32_t)maquina_est->medidas_sens->tension_sis);
-		//sprintf(pulso, "%d.%.3d", (int16_t)maquina_est->medidas_sens->pulso, abs((int16_t)((maquina_est->medidas_sens->pulso-(int16_t)maquina_est->medidas_sens->pulso)*1000.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
-		//sprintf(pulso, "%d.%.d", (int16_t)maquina_est->medidas_sens->pulso, abs((int16_t)((maquina_est->medidas_sens->pulso-(int16_t)maquina_est->medidas_sens->pulso)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
+		
 		sprintf(pulso, "%d", (uint32_t)maquina_est->medidas_sens->pulso);
-		//sprintf(pulso, "%u", maquina_est->medidas_sens->pulso);  //Hacer cast de int a char
+		
 		sprintf(temperatura, "%d.%.1d", (int16_t)maquina_est->medidas_sens->temperatura, abs((int16_t)((maquina_est->medidas_sens->temperatura-(int16_t)maquina_est->medidas_sens->temperatura)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
 
 /*		temperatura_ponderada = (float)((float)maquina_est->medidas_sens->temperatura*0.00390625);
@@ -407,13 +398,6 @@ void imprimirMedidas(maq_estados* maquina_est){
 		strcat(tension, "/"); //Para concatenar 2 strings
 		strcat(tension, tension_dia); //Para concatenar 2 strings
 
-
-		/*u8g2_SetFont(&u8g2, u8g2_font_profont12_tf);  //Fuente para nombres de parámetros
-		u8g2_DrawStr(&u8g2, 60, 20, "Valor1");
-		u8g2_DrawStr(&u8g2, 60, 31, "Valor2a/Valor2b");
-		u8g2_DrawStr(&u8g2, 60, 42, "Valor3");
-		u8g2_DrawStr(&u8g2, 60, 54, "Valor4");
-		u8g2_DrawStr(&u8g2, 60, 64, "Valor5");*/
 
 		//Escribir valores de lecturas
 		u8g2_SetFont(&u8g2, u8g2_font_profont12_tf);  //Fuente para nombres de parámetros
@@ -430,7 +414,6 @@ void imprimirMedidas(maq_estados* maquina_est){
 		u8g2_DrawStr(&u8g2, 90, 54, "ºC");
 
 
-
 		u8g2_SetFont(&u8g2, u8g2_font_open_iconic_all_2x_t);  //Fuente para los iconos
 		u8g2_DrawGlyph(&u8g2, 93, 14, 238);  //Electrocardiograma
 		u8g2_DrawGlyph(&u8g2, 110, 64, 183);  //Corazón
@@ -443,11 +426,10 @@ void imprimirMedidas(maq_estados* maquina_est){
  * Pantalla en la que se muestra una alerta por la medida de algún sensor
  * Se pasa como parámetro el número de orden dentro de la estructura de medidas que provocó la alerta
  */
-//void imprimirAlertaSensor(medidasSensores* med_sensores, uint8_t sensor){
 void imprimirAlertaSensor(medidasSensores* med_sensores){
 
 	char  parametro[16], valor[32], unidades[16];
-	//char  alcohol[16], tension_sis[32], tension_dia[16], pulso[16], temperatura[16], estres[16], tension[64];
+	
 	u8g2_uint_t x_param, x_valor, x_uds;
 
 	switch(med_sensores->medida_mala){
@@ -456,8 +438,6 @@ void imprimirAlertaSensor(medidasSensores* med_sensores){
 			x_valor = 60;
 			x_uds = 95;
 			strcpy(parametro, "Alcohol: ");
-			//strcpy(valor, (char) med_sensores->alcohol);
-			//sprintf(valor, "%lu", med_sensores->alcohol);  //Hacer cast de uint32_t (es un long unsigned int) a char
 			sprintf(valor, "%d.%.3d", (int16_t)med_sensores->alcohol, abs((int16_t)((med_sensores->alcohol-(int16_t)med_sensores->alcohol)*1000.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
 			strcpy(unidades, "mg/l");
 			break;
@@ -483,12 +463,7 @@ void imprimirAlertaSensor(medidasSensores* med_sensores){
 			x_valor = 50;
 			x_uds = 70;
 			strcpy(parametro, "Pulso: ");
-			//strcpy(valor, (char) med_sensores->pulso);
-			//sprintf(valor, "%lu", med_sensores->pulso);  //Hacer cast de uint32_t (es un long unsigned int) a char
-			//sprintf(valor, "%d.%.3d", (int16_t)med_sensores->pulso, abs((int16_t)((med_sensores->pulso-(int16_t)med_sensores->pulso)*1000.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
-			//sprintf(valor, "%d.%.1d", (int16_t)med_sensores->pulso, abs((int16_t)((med_sensores->pulso-(int16_t)med_sensores->pulso)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
-			sprintf(valor, "%d", (uint32_t)med_sensores->pulso);
-			//sprintf(valor, "%u", med_sensores->pulso);  //Hacer cast de int a char
+			sprintf(valor, "%d", (uint32_t)med_sensores->pulso);  //Hacer cast de int a char
 			strcpy(unidades, "pul/min");
 			break;
 		case 4:  //Temperatura
@@ -496,8 +471,6 @@ void imprimirAlertaSensor(medidasSensores* med_sensores){
 			x_valor = 50;
 			x_uds = 95;
 			strcpy(parametro, "Temp: ");
-			//strcpy(valor, (char) med_sensores->temperatura);
-			//sprintf(valor, "%lu", med_sensores->temperatura);  //Hacer cast de uint32_t (es un long unsigned int) a char
 			sprintf(valor, "%d.%.1d", (int16_t)med_sensores->temperatura, abs((int16_t)((med_sensores->temperatura-(int16_t)med_sensores->temperatura)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
 			strcpy(unidades, "ºC");
 			break;
@@ -521,16 +494,7 @@ void imprimirAlertaSensor(medidasSensores* med_sensores){
 
 	u8g2_FirstPage(&u8g2);
 	do{
-		/*u8g2_SetFont(&u8g2, u8g2_font_helvB08_tf);  //Fuente para el texto superior
-		u8g2_DrawStr(&u8g2, 30, 14, "PRECAUCIÓN");
-		u8g2_SetFont(&u8g2, u8g2_font_7x14_tf);  //Fuente para el texto inferior
-		u8g2_DrawStr(&u8g2, x_param, 64, parametro);
-		u8g2_DrawStr(&u8g2, x_valor, 64, valor);
-		u8g2_DrawStr(&u8g2, x_uds, 64, unidades);
-		u8g2_SetFont(&u8g2, u8g2_font_open_iconic_all_4x_t);  //Fuente para el icono
-		u8g2_DrawGlyph(&u8g2, 50, 20, 280);  //Señal de precaución*/
-
-
+		
 		u8g2_SetDrawColor(&u8g2, 1);  //Para invertir los colores
 		u8g2_DrawBox(&u8g2, 0, 0, 128, 65);
 		u8g2_SetDrawColor(&u8g2, 0);
@@ -545,99 +509,6 @@ void imprimirAlertaSensor(medidasSensores* med_sensores){
 	}while(u8g2_NextPage(&u8g2));
 
 }
-
-/*
-//BORRAAAAAAAAAAAAR!!!!
-void imprimirAlertaSensor(uint32_t med_sensores1, uint32_t med_sensores2 , uint8_t sensor){
-
-	char  parametro[16], valor[16], unidades[16], tension_sis[16], tension_dia[16];
-	u8g2_uint_t x_param, x_valor, x_uds;
-	float medida_float;
-
-	//sprintf(valor, "%lu", med_sensores);  //Hacer cast de uint32_t (es un long unsigned int) a char
-
-	switch(sensor){
-		case 1:  //Es el primer parámetro de la estructura, el alcohol
-			x_param = 1;
-			x_valor = 60;
-			x_uds = 95;
-			strcpy(parametro, "Alcohol: ");
-			medida_float = (float)((float)med_sensores1*0.00390625);
-			//Hacer cast de uint32_t (es un long unsigned int) a char
-			//sprintf(valor, "%.2f", medida_float);  //No funciona %2f en STM32
-			//sprintf(valor, "%d.%.2d", (int16_t)medida_float, abs((int16_t)((medida_float-(int16_t)medida_float)*100.0)));  //%d Muestra la parte entera y %.2d Muestra la parte decimal
-			//Un solo dígito decimal
-			sprintf(valor, "%d.%.1d", (int16_t)medida_float, abs((int16_t)((medida_float-(int16_t)medida_float)*10.0)));  //%d Muestra la parte entera y %.1d Muestra la parte decimal (el 1 fuerza que salga el 0 cuando es X.0)
-
-			strcpy(unidades, "mg/l");
-			break;
-		case 2:  //Tensión
-			x_param = 1;
-			x_valor = 60;
-			x_uds = 95;
-
-			sprintf(tension_sis, "%lu", med_sensores1);  //Hacer cast de int a char
-			sprintf(tension_dia, "%lu", med_sensores2);  //Hacer cast de int a char
-
-			//Representar las tensiones como diastólica/sistólica
-			strcat(valor, tension_sis); //Para concatenar 2 strings
-			strcat(valor, "/"); //Para concatenar 2 strings
-			strcat(valor, tension_dia); //Para concatenar 2 strings
-
-			strcpy(parametro, "Tensión: ");
-			sprintf(valor, "%lu", valor);  //Hacer cast de uint32_t (es un long unsigned int) a char
-			strcpy(unidades, "mmHg");
-			break;
-		case 3:  //Pulso
-			x_param = 1;
-			x_valor = 60;
-			x_uds = 95;
-			strcpy(parametro, "Pulso: ");
-			sprintf(valor, "%lu", med_sensores1);  //Hacer cast de uint32_t (es un long unsigned int) a char
-			strcpy(unidades, "pul/min");
-			break;
-		case 4:  //Temperatura
-			x_param = 1;
-			x_valor = 60;
-			x_uds = 95;
-			strcpy(parametro, "Temp: ");
-			strcpy(valor, (char) med_sensores1);
-			strcpy(unidades, "ºC");
-			break;
-		case 5:  //Estrés
-			x_param = 1;
-			x_valor = 60;
-			x_uds = 95;
-			strcpy(parametro, "Estrés: ");
-			strcpy(valor, med_sensores1);
-			strcpy(unidades, "");
-			break;
-		default:
-			x_param = 1;
-			x_valor = 60;
-			x_uds = 95;
-			strcpy(parametro, "Error");
-			strcpy(valor, "Algo fue mal");
-			strcpy(unidades, "");
-			break;
-	}
-
-	u8g2_FirstPage(&u8g2);
-	do{
-		u8g2_SetDrawColor(&u8g2, 1);  //Para invertir los colores
-		u8g2_DrawBox(&u8g2, 0, 0, 128, 65);
-		u8g2_SetDrawColor(&u8g2, 0);
-		u8g2_SetFont(&u8g2, u8g2_font_helvB08_tf);  //Fuente para el texto superior
-		u8g2_DrawStr(&u8g2, 30, 43, "PRECAUCIÓN");
-		u8g2_SetFont(&u8g2, u8g2_font_7x14_tf);  //Fuente para el texto inferior
-		u8g2_DrawStr(&u8g2, x_param, 62, parametro);
-		u8g2_DrawStr(&u8g2, x_valor, 62, valor);
-		u8g2_DrawStr(&u8g2, x_uds, 62, unidades);
-		u8g2_SetFont(&u8g2, u8g2_font_open_iconic_all_4x_t);  //Fuente para el icono
-		u8g2_DrawGlyph(&u8g2, 50, 31, 280);  //Señal de precaución
-	}while(u8g2_NextPage(&u8g2));
-}
-*/
 
 
 
@@ -702,7 +573,7 @@ void imprimirSecuencia(uint8_t caso){
  * Función que maneja las otras funciones de impresión por pantalla
  */
 void imprimirAviso(maq_estados* maquina_est, int tipoAviso){
-	//LLAMAR A LAS FUNCIONES DE IMPRIMIR SEGÚN EL TIPO DE AVISO
+	
 	switch(tipoAviso){
 		case 0:  //Pantalla de inicio
 			imprimirBasico(4);
@@ -743,7 +614,7 @@ void imprimirAviso(maq_estados* maquina_est, int tipoAviso){
  *  Pantalla para las pruebas de sensores
  */
 void imprimirPruebas(uint8_t sensor, float valor1, float valor2){
-	//char  alcohol[16], tension_sis[16], tension_dia[16], pulso[16], temperatura[16], estres[16], tension[16];
+	
 	char  tension_sis[32], tension_dia[32], tension[64], valor[64], valor_aux[64];
 	float valor_float;
 
@@ -820,7 +691,7 @@ void imprimirPruebas(uint8_t sensor, float valor1, float valor2){
 				u8g2_DrawStr(&u8g2, 60, 42, valor);  //Pulso
 				break;
 		}
-		//u8g2_DrawStr(&u8g2, 60, 54, valor1);  //Temperatura
+		
 
 		u8g2_SetFont(&u8g2, u8g2_font_open_iconic_all_2x_t);  //Fuente para los iconos
 		u8g2_DrawGlyph(&u8g2, 93, 14, 238);  //Electrocardiograma

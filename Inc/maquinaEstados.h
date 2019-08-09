@@ -16,6 +16,7 @@ typedef struct maq_estados maq_estados;  //Necesito declararla antes y luego hac
 
 //Funciones con condiciones para cambios de estado y acciones en el estado destino (punteros a funciones con argumento "maquina_estados")
 //typedef void (*func_condicion) (maquina_estados*);
+
 //Poner dos si necesito que una sea void y la otra no o si necesito otros argumentos en alguna
 typedef int (*func_cambio) (maq_estados*);  //Devuelve int para poder controlar cuándo debe entrar a un estado u otro
 typedef void (*func_destino) (maq_estados*);
@@ -26,8 +27,6 @@ typedef struct maq_transiciones{
   	func_cambio condic_cambio; //Comprobación de si se cumple o no la condición para hacer la transición
   	uint8_t estado_destino; //Estado al que irá
   	func_destino accion_destino;  //Acción a realizar en el estado destino
-	//func_condicion condic_entrada;
-	//func_condicion condic_salida;
 
 } maq_transiciones;
 
@@ -54,7 +53,6 @@ struct maq_estados{
 };
 
 //Crear una máquina de estados
-//maq_estados* crear_maq(estado_maq* situ_maquina, maq_transiciones* trans_maquina, medidasSensores* medidas_sens);
 maq_estados* crear_maq(maq_transiciones* trans_maquina);
 
 //Inicializar la máquina de estados
